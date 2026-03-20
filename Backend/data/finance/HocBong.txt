@@ -1,0 +1,65 @@
+- Đối tượng hợp lệ được xét Học bổng khuyến khích học tập là sinh viên đại học chính quy và sinh viên liên thông từ hệ cao đẳng lên hệ đại học chính quy.
+
+- Điều kiện bắt buộc để sinh viên được xét Học bổng khuyến khích học tập là sinh viên phải đang học ngành đào tạo thứ nhất và vẫn còn trong thời gian thiết kế chuẩn của chương trình đào tạo.
+- Nếu sinh viên học quá thời gian thiết kế chuẩn của chương trình đào tạo thì sinh viên không được xét Học bổng khuyến khích học tập.
+- Nếu sinh viên bị kỷ luật từ mức khiển trách trở lên trong kỳ xét học bổng thì sinh viên không được xét Học bổng khuyến khích học tập.
+
+- Học bổng khuyến khích học tập có 3 mức gồm Học bổng loại Khá, Học bổng loại Giỏi và Học bổng loại Xuất sắc.
+
+- Mức 1 của Học bổng khuyến khích học tập là Học bổng loại Khá.
+- Sinh viên được xếp Học bổng loại Khá nếu Điểm trung bình học tập đạt từ loại Khá trở lên và Điểm rèn luyện đạt từ loại Khá trở lên.
+- Nếu sinh viên được Học bổng loại Khá thì sinh viên được nhận số tiền học bổng bằng 100 phần trăm học phí của 1 tín chỉ đại học nhân với số tín chỉ được tính học bổng.
+- Công thức tính tiền Học bổng loại Khá là: 100 phần trăm × học phí của 1 tín chỉ đại học × số tín chỉ được tính học bổng.
+
+- Mức 2 của Học bổng khuyến khích học tập là Học bổng loại Giỏi.
+- Sinh viên được xếp Học bổng loại Giỏi nếu Điểm trung bình học tập đạt từ loại Giỏi trở lên và Điểm rèn luyện đạt từ loại Tốt trở lên.
+- Nếu sinh viên được Học bổng loại Giỏi thì sinh viên được nhận số tiền học bổng bằng 110 phần trăm học phí của 1 tín chỉ đại học nhân với số tín chỉ được tính học bổng.
+- Công thức tính tiền Học bổng loại Giỏi là: 110 phần trăm × học phí của 1 tín chỉ đại học × số tín chỉ được tính học bổng.
+
+- Mức 3 của Học bổng khuyến khích học tập là Học bổng loại Xuất sắc.
+- Sinh viên được xếp Học bổng loại Xuất sắc nếu Điểm trung bình học tập đạt loại Xuất sắc và Điểm rèn luyện đạt loại Xuất sắc.
+- Nếu sinh viên được Học bổng loại Xuất sắc thì sinh viên được nhận số tiền học bổng bằng 120 phần trăm học phí của 1 tín chỉ đại học nhân với số tín chỉ được tính học bổng.
+- Công thức tính tiền Học bổng loại Xuất sắc là: 120 phần trăm × học phí của 1 tín chỉ đại học × số tín chỉ được tính học bổng.
+
+- Việc xét Học bổng khuyến khích học tập được thực hiện dựa trên kết quả học tập và kết quả rèn luyện của sinh viên trong học kỳ liền trước.
+- Thang điểm dùng để xét Học bổng khuyến khích học tập là thang điểm 4, và điểm xét được làm tròn đến 2 chữ số sau dấu phẩy.
+- Công thức tính Điểm xét học bổng là: Điểm trung bình học tập + (Điểm rèn luyện / 100).
+
+- Các môn học được đưa vào xét Học bổng khuyến khích học tập chỉ bao gồm các môn học lần đầu trong học kỳ, bao gồm kỳ học chính, kỳ học hè và kỳ học song song.
+- Các môn không được tính vào xét Học bổng khuyến khích học tập gồm môn Giáo dục thể chất, môn Giáo dục quốc phòng, các môn thuộc chương trình đào tạo thứ hai và các môn học được bảo lưu.
+- Một điều kiện bắt buộc để được xét Học bổng khuyến khích học tập là sinh viên không có bất kỳ môn học nào bị điểm F.
+
+- Điều kiện tối thiểu về số tín chỉ để xét Học bổng khuyến khích học tập là số tín chỉ môn học sinh viên đăng ký học và thi lần đầu trong kỳ phải lớn hơn hoặc bằng 15 tín chỉ.
+- Ngoại lệ thứ nhất về số tín chỉ là nếu ngành học trong kỳ đó mở số tín chỉ tối đa nhỏ hơn 15 tín chỉ thì nhà trường lấy chính số tín chỉ tối đa được mở của ngành trong kỳ đó làm chuẩn xét học bổng.
+- Ngoại lệ thứ hai về số tín chỉ là trong học kỳ cuối, số tín chỉ để xét học bổng được tính bằng số tín chỉ của học phần tốt nghiệp.
+- Ngoại lệ thứ ba về số tín chỉ là nếu sinh viên học vượt, số tín chỉ trong kỳ nhỏ hơn 15 tín chỉ nhưng tổng số tín chỉ tích lũy đã đạt đúng tiến độ của chương trình chuẩn thì sinh viên vẫn được xét Học bổng khuyến khích học tập.
+
+- Nguồn quỹ tối thiểu để xét duyệt và cấp phát Học bổng khuyến khích học tập bằng 8 phần trăm tổng nguồn thu học phí của trường.
+- Danh sách xét duyệt cấp phát học bổng được lấy theo thứ tự từ sinh viên có mức ưu tiên cao hơn xuống thấp hơn cho đến khi hết nguồn quỹ.
+- Thứ tự ưu tiên thứ nhất trong xét duyệt cấp phát học bổng là ưu tiên theo loại học bổng, trong đó Học bổng loại Xuất sắc được xét trước, tiếp đến là Học bổng loại Giỏi, và cuối cùng là Học bổng loại Khá.
+- Thứ tự ưu tiên thứ hai trong xét duyệt cấp phát học bổng là ưu tiên sinh viên có Điểm xét học bổng cao hơn.
+- Thứ tự ưu tiên thứ ba trong xét duyệt cấp phát học bổng là ưu tiên sinh viên có số tín chỉ học trong kỳ nhiều hơn.
+
+- Phần 2 của văn bản quy định về Học bổng chính sách.
+
+- Đối tượng hợp lệ được áp dụng Học bổng chính sách là sinh viên đang theo học chế độ cử tuyển.
+- Các đối tượng không được áp dụng Học bổng chính sách gồm sinh viên hệ văn bằng hai, sinh viên đào tạo theo địa chỉ, sinh viên đào tạo từ xa, sinh viên liên kết đào tạo và sinh viên vừa làm vừa học.
+- Mức tiền của Học bổng chính sách bằng 80 phần trăm mức lương cơ sở tính cho 1 tháng.
+
+- Thời gian hưởng định kỳ của Học bổng chính sách là đủ 12 tháng trong 1 năm học.
+- Đối với năm học cuối, thời gian hưởng Học bổng chính sách được tính theo số tháng sinh viên thực học.
+- Sinh viên chỉ được hưởng Học bổng chính sách 1 lần trong toàn bộ quá trình học và thời gian hưởng không được vượt quá thời gian đào tạo tối đa.
+
+- Sinh viên vẫn có thể được hưởng Học bổng chính sách nếu đồng thời đang nhận Trợ cấp ưu đãi, Trợ cấp xã hội hoặc Học bổng khuyến khích học tập.
+- Nếu sinh viên đồng thời được hưởng nhiều chế độ chính sách khác nhau thì sinh viên chỉ được nhận một mức hỗ trợ cao nhất.
+
+- Nếu sinh viên bị đình chỉ học hoặc bị buộc thôi học thì sinh viên không được hưởng Học bổng chính sách.
+- Nếu sinh viên tự thôi học hoặc bị buộc thôi học thì sinh viên phải bồi hoàn lại toàn bộ số tiền Học bổng chính sách đã nhận, trừ trường hợp có lý do bất khả kháng.
+
+- Hình thức chi trả Học bổng chính sách là chuyển khoản qua tài khoản ngân hàng của sinh viên.
+- Học bổng chính sách được chi trả 2 lần trong 1 năm, mỗi lần tương đương 6 tháng học bổng.
+- Lịch chi trả chuẩn của Học bổng chính sách là Lần 1 vào tháng 10 và Lần 2 vào tháng 3 hằng năm.
+- Đối với tân sinh viên, kỳ nhận Học bổng chính sách đầu tiên của khóa học được dời vào tháng 3 của năm liền sau.
+
+Nếu học phí của 1 tín chỉ đại học là 420.000 đồng và số tín chỉ được tính học bổng là 19 tín chỉ thì:
+Tiền nhận được học bổng loại Xuất sắc = 120% × 420.000 × 19= 1,2 × 420.000 × 19= 9.576.000 đồng
