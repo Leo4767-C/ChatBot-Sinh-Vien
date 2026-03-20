@@ -1,28 +1,31 @@
-# Gọi OpenAI hoặc local embedding model
+# ================== IMPORT ==================
 import logging
 import uuid
+import json
+import re
 
 from FlagEmbedding import BGEM3FlagModel
-
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 from app.core.config import settings
 from app.schemas.enums import BotLanguage
 from app.schemas.llm import GeminiResponse
-import json
-import re
 
-# Load biến môi trường từ .env
+# ================== CONFIG ==================
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-# Khởi tạo client
-client = genai.Client(api_key=settings.EFFECTIVE_GEMINI_API_KEY)
+# Gemini config
+genai.configure(api_key=settings.EFFECTIVE_GEMINI_API_KEY)
+
+# Model Gemini
+model = genai.GenerativeModel("gemini-pro")
+
+# Embedding model
 embedder = BGEM3FlagModel('BAAI/bge-m3', use_fp16=True)
 
-
+# ================== EMBEDDING ==================
 def get_embeddings(texts: list[str]):
     output = embedder.encode(
         texts,
@@ -33,146 +36,125 @@ def get_embeddings(texts: list[str]):
     return output['dense_vecs'], output['lexical_weights'], output['colbert_vecs']
 
 
-async def generate_answer(retrieved_context: list[str], system_prompt: str, model="gpt-3.5-turbo", temperature=0.3,
-                          question: str = "", chat_histories: list[dict] = None, language: BotLanguage = BotLanguage.VIE):
-    """
-    Gọi Gemini API để sinh câu trả lời từ một prompt, lịch sử hội thoại và ngữ cảnh (context).
-    """
+# ================== SIMPLE GEMINI ==================
+def ask_gemini(prompt: str):
+    response = model.generate_content(prompt)
+    return response.text
+
+
+# ================== GENERATE ANSWER ==================
+async def generate_answer(
+    retrieved_context: list[str],
+    system_prompt: str,
+    temperature=0.3,
+    question: str = "",
+    chat_histories: list = None,
+    language: BotLanguage = BotLanguage.VIE
+):
     logger.info("========== CONTEXT =======")
+
     context_blocks = []
     for i, context in enumerate(retrieved_context, start=1):
         context_blocks.append(f"[CONTEXT {i}]: {context.strip()}")
-        logger.info(f"Context {i}: {context.strip()}")
+
     formatted_context = "\n\n".join(context_blocks)
 
-    full_prompt = system_prompt.replace("{{context}}", formatted_context).replace("{{language}}", language.label()).replace("{{question}}", question)
-
-    if chat_histories:
-        contents = chat_histories + [types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=question)]
-        )]
-    else:
-        contents = [types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=question)]
-        )]
-
-    response = client.models.generate_content(
-        model=model,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=full_prompt,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-            temperature=temperature,
-            max_output_tokens=1000
-        )
+    full_prompt = (
+        system_prompt
+        .replace("{{context}}", formatted_context)
+        .replace("{{language}}", language.label())
+        .replace("{{question}}", question)
     )
 
-    response_text = re.sub(r"^```json\s*|\s*```$", "", response.text.strip(), flags=re.MULTILINE).strip()
-
     try:
-        return json.loads(response_text)
-    except json.JSONDecodeError:
-        logger.error("Error when parsing response")
-        return {"content": response_text, "code": 0}
+        response = model.generate_content(full_prompt)
+
+        response_text = re.sub(
+            r"^```json\s*|\s*```$",
+            "",
+            response.text.strip(),
+            flags=re.MULTILINE
+        ).strip()
+
+        try:
+            return json.loads(response_text)
+        except:
+            return {"content": response_text, "code": 0}
+
+    except Exception as e:
+        logger.error(str(e))
+        return {"content": str(e), "code": -1}
 
 
+# ================== V2 ==================
 sys_prompt = """
-# ROLE & MAIN TASK\n
-Bạn là một AI Bot thông minh, đáng tin cậy. Nhiệm vụ của bạn là: tuân thủ các quy tắc dưới đây, dựa trên các đoạn ngữ cảnh được cung cấp bên dưới và những kiến thức mà bạn có \nđể trả lời câu hỏi mà người dùng đặt ra một cách tự nhiên và mạch lạc.\n\n
-# PROVIDED CONTEXT\n
-```{{contexts}}```\n\n
-# USER QUESTION\n
+# ROLE & MAIN TASK
+Bạn là một AI Bot thông minh, đáng tin cậy.
+
+# PROVIDED CONTEXT
+```{{contexts}}```
+
+# USER QUESTION
 ```{{user_question}}```
 """
 
 
-async def generate_answer_v2(retrieved_context: list[str], system_prompt: str, model="gpt-3.5-turbo", temperature=0.3,
-                          question: str = "", chat_histories: list[dict] = None, language: BotLanguage = BotLanguage.VIE) -> GeminiResponse:
-    logger.info("========== CONTEXT =======")
+async def generate_answer_v2(
+    retrieved_context: list[str],
+    system_prompt: str,
+    temperature=0.3,
+    question: str = "",
+    chat_histories: list = None,
+    language: BotLanguage = BotLanguage.VIE
+) -> GeminiResponse:
+
     context_blocks = []
     for i, context in enumerate(retrieved_context, start=1):
         context_blocks.append(f"[CONTEXT {i}]: {context.strip()}")
-        logger.info(f"Context {i}: {context.strip()}")
+
     formatted_context = "\n".join(context_blocks)
 
-    full_prompt = sys_prompt.replace("{{contexts}}", formatted_context).replace("{{language}}", language.label()).replace("{{user_question}}", question)
-
-    if chat_histories:
-        contents = chat_histories + [types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=question)]
-        )]
-    else:
-        contents = [types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=question)]
-        )]
-
-    response = client.models.generate_content(
-        model=model,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=full_prompt,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-            temperature=temperature,
-            max_output_tokens=1500,
-            response_mime_type="application/json",
-            response_schema=GeminiResponse.model_json_schema()
-        )
+    full_prompt = (
+        sys_prompt
+        .replace("{{contexts}}", formatted_context)
+        .replace("{{user_question}}", question)
     )
 
-    result = GeminiResponse.model_validate_json(response.text)
-    return result
+    response = model.generate_content(full_prompt)
+
+    try:
+        return GeminiResponse.model_validate_json(response.text)
+    except:
+        return GeminiResponse(content=response.text, code=0)
 
 
+# ================== STREAMING ==================
 async def generate_answer_streaming(
-        retrieved_context: list[str],
-        system_prompt: str,
-        conversation_uid: str | uuid.UUID,
-        model="gpt-3.5-turbo",
-        temperature=0.3,
-        question: str = "",
-        chat_histories: list[dict] = None,
-        language: BotLanguage = BotLanguage.VIE
+    retrieved_context: list[str],
+    system_prompt: str,
+    conversation_uid: str | uuid.UUID,
+    temperature=0.3,
+    question: str = "",
+    chat_histories: list = None,
+    language: BotLanguage = BotLanguage.VIE
 ):
-    """
-    Sinh câu trả lời dạng stream.
-    """
-    from app.worker.tasks import save_dialogue  # import lazy để tránh circular import
+    from app.worker.tasks import save_dialogue
 
     context_blocks = []
     for i, context in enumerate(retrieved_context, start=1):
         context_blocks.append(f"[CONTEXT {i}]: {context.strip()}")
+
     formatted_context = "\n\n".join(context_blocks)
 
-    full_prompt = (system_prompt.replace("{{context}}", formatted_context)
-                   .replace("{{language}}", language.label())
-                   .replace("{{question}}", question))
-
-    if chat_histories:
-        contents = chat_histories + [types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=question)]
-        )]
-    else:
-        contents = [types.Content(
-            role="user",
-            parts=[types.Part.from_text(text=question)]
-        )]
+    full_prompt = (
+        system_prompt
+        .replace("{{context}}", formatted_context)
+        .replace("{{language}}", language.label())
+        .replace("{{question}}", question)
+    )
 
     try:
-        stream = client.models.generate_content_stream(
-            model=model,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=full_prompt,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-                temperature=temperature,
-                max_output_tokens=1000
-            )
-        )
+        stream = model.generate_content(full_prompt, stream=True)
 
         buffer = ""
         for chunk in stream:

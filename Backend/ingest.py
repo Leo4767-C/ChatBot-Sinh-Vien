@@ -6,10 +6,10 @@ ingest.py — Phase 1 Ingest với hỗ trợ đầy đủ:
 """
 import argparse
 import logging
-import os
 import sys
 import uuid
 import shutil
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -29,8 +29,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger(__name__)
 
 SUPPORTED = {".pdf", ".docx", ".txt", ".md"}
-DATA_DIR  = ROOT / "data"
-IMG_DIR   = ROOT / "data" / "images"
+DATA_DIR = ROOT / "data"
+IMG_DIR = ROOT / "data" / "images"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -46,9 +46,9 @@ def _copy_to_static(src_path: str) -> str | None:
 
 
 def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
-    log.info(f"\n{'='*55}")
+    log.info(f"\n{'=' * 55}")
     log.info(f"📄 Đang xử lý: {file_path.name}")
-    log.info(f"{'='*55}")
+    log.info(f"{'=' * 55}")
 
     if not doc_id:
         doc_id = str(uuid.uuid4())
@@ -80,7 +80,7 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
 
     # 3a. Text chunks + ảnh thường
     for chunk in text_chunks:
-        image_urls  = []
+        image_urls = []
         image_descs = []
 
         for img_path in chunk.get("image_paths", []):
@@ -89,6 +89,7 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
             url = _copy_to_static(img_path)
             if url:
                 image_urls.append(url)
+
             desc = describe_image(img_path)
             if desc:
                 image_descs.append(desc)
@@ -98,12 +99,12 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
             embed_text += "\n\n" + "\n".join(f"[Hình ảnh: {d}]" for d in image_descs)
 
         enriched.append({
-            "text":        chunk["text"],
-            "embed_text":  embed_text,
-            "pages":       chunk.get("pages", []),
-            "image_urls":  image_urls,
+            "text": chunk["text"],
+            "embed_text": embed_text,
+            "pages": chunk.get("pages", []),
+            "image_urls": image_urls,
             "image_descs": image_descs,
-            "is_table":    False,
+            "is_table": False,
         })
 
     # 3b. Bảng → tạo chunk riêng mỗi bảng
@@ -111,12 +112,10 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
         img_path = tbl["image_path"]
         url = _copy_to_static(img_path)
 
-        # Gemini Vision mô tả bảng
         desc = describe_image(img_path)
         if not desc:
             desc = "Bảng dữ liệu"
 
-        # Text embed = markdown text của bảng + mô tả Gemini
         embed_text = (
             f"[Bảng dữ liệu]\n{tbl['table_text']}\n\n"
             f"[Mô tả bảng: {desc}]"
@@ -125,12 +124,12 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
         page_info = [tbl["page"]] if tbl.get("page") else []
 
         enriched.append({
-            "text":        f"[Bảng] {desc}\n\n{tbl['table_text']}",
-            "embed_text":  embed_text,
-            "pages":       page_info,
-            "image_urls":  [url] if url else [],
+            "text": f"[Bảng] {desc}\n\n{tbl['table_text']}",
+            "embed_text": embed_text,
+            "pages": page_info,
+            "image_urls": [url] if url else [],
             "image_descs": [desc],
-            "is_table":    True,
+            "is_table": True,
         })
         log.info(f"  🗃  Bảng chunk: {desc[:60]}...")
 
@@ -139,7 +138,7 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
     if not enriched:
-        log.warning(f"  Không có chunk nào!")
+        log.warning("  Không có chunk nào!")
         return 0
 
     log.info(f"  → Tổng {len(enriched)} chunks (text + bảng), bắt đầu embed...")
@@ -153,33 +152,39 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
         texts = [c["embed_text"] for c in batch]
 
         try:
-            dense_vecs, sparse_vecs, colbert_vecs = get_embeddings(texts)
+            dense_vecs, sparse_vecs, _ = get_embeddings(texts)
         except Exception as e:
             log.error(f"  Embed lỗi batch {i // batch_size + 1}: {e}")
             continue
 
         vectors = []
         for j, chunk in enumerate(batch):
-            sparse = sparse_vecs[j]
+            sparse = sparse_vecs[j] or {}
+
+            dense_vec = dense_vecs[j]
+            if hasattr(dense_vec, "tolist"):
+                dense_vec = dense_vec.tolist()
+
+            dense_vec = [float(x) for x in dense_vec]
+
             vectors.append({
                 "id": str(uuid.uuid4()),
                 "vector": {
-                    "dense": dense_vecs[j].tolist(),
+                    "dense": dense_vec,
                     "sparse": {
                         "indices": [int(k) for k in sparse.keys()],
-                        "values":  [float(v) for v in sparse.values()],
+                        "values": [float(v) for v in sparse.values()],
                     },
-                    "late": colbert_vecs[j].tolist(),
                 },
                 "payload": {
-                    "content":     chunk["text"],
-                    "doc_id":      doc_id,
-                    "doc_name":    file_path.name,
-                    "pages":       chunk["pages"],
-                    "image_urls":  chunk["image_urls"],
+                    "content": chunk["text"],
+                    "doc_id": doc_id,
+                    "doc_name": file_path.name,
+                    "pages": chunk["pages"],
+                    "image_urls": chunk["image_urls"],
                     "image_descs": chunk["image_descs"],
-                    "is_table":    chunk["is_table"],    # ← đánh dấu chunk là bảng
-                    "created_at":  __import__("datetime").datetime.utcnow().isoformat(),
+                    "is_table": chunk["is_table"],
+                    "created_at": datetime.utcnow().isoformat(),
                 },
             })
 
@@ -202,9 +207,9 @@ def ingest_directory(directory: Path) -> None:
 
     log.info(f"Tìm thấy {len(files)} file")
     total = sum(ingest_file(f) for f in files)
-    log.info(f"\n{'='*55}")
+    log.info(f"\n{'=' * 55}")
     log.info(f"✅ HOÀN TẤT: {len(files)} files, {total} chunks vào Qdrant")
-    log.info(f"{'='*55}\nChạy uvicorn main:app --reload và chat thôi!")
+    log.info(f"{'=' * 55}\nChạy uvicorn main:app --reload và chat thôi!")
 
 
 def clear_collection() -> None:
@@ -218,8 +223,8 @@ def clear_collection() -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ingest data vào Qdrant")
-    parser.add_argument("--file",  type=str, help="1 file cụ thể")
-    parser.add_argument("--dir",   type=str, default=str(DATA_DIR))
+    parser.add_argument("--file", type=str, help="1 file cụ thể")
+    parser.add_argument("--dir", type=str, default=str(DATA_DIR))
     parser.add_argument("--clear", action="store_true", help="Xóa Qdrant rồi ingest lại")
     args = parser.parse_args()
 
