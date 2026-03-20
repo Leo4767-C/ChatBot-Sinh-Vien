@@ -1,0 +1,197 @@
+CHI TIẾT TỔ HỢP MÔN VÀ ĐIỂM CHUẨN TỪNG NGÀNH
+1. Ngành Xây dựng và quản lý công trình thủy (Kỹ thuật xây dựng công trình thủy)
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 18.48 điểm
+- Điểm chuẩn xét học bạ: 23.46 điểm
+2. Ngành Kỹ thuật tài nguyên nước
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 18.49 điểm
+- Điểm chuẩn xét học bạ: 23.48 điểm
+3. Ngành Tài nguyên nước và môi trường (Thủy văn học)
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 18.00 điểm
+- Điểm chuẩn xét học bạ: 22.66 điểm
+4. Ngành Kỹ thuật xây dựng dân dụng và công nghiệp (Kỹ thuật xây dựng)
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 18.76 điểm
+- Điểm chuẩn xét học bạ: 23.72 điểm
+5. Ngành Kỹ thuật cơ khí
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 22.60 điểm
+- Điểm chuẩn xét học bạ: 27.18 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 59.42 điểm
+6. Ngành Công nghệ thông tin
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 23.23 điểm
+- Điểm chuẩn xét học bạ: 27.89 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 61.94 điểm
+7. Ngành Kỹ thuật cấp thoát nước
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 18.00 điểm
+- Điểm chuẩn xét học bạ: 22.67 điểm
+8. Ngành Kỹ thuật môi trường
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X10
+- Điểm chuẩn thi trung học phổ thông: 17.75 điểm
+- Điểm chuẩn xét học bạ: 22.27 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 46.67 điểm
+9. Ngành Xây dựng và quản lý hạ tầng đô thị (Kỹ thuật cơ sở hạ tầng)
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 19.00 điểm
+- Điểm chuẩn xét học bạ: 23.93 điểm
+10. Ngành Công nghệ kỹ thuật xây dựng
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 19.48 điểm
+- Điểm chuẩn xét học bạ: 24.34 điểm
+11. Ngành Kỹ thuật điện
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 22.00 điểm
+- Điểm chuẩn xét học bạ: 26.50 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 56.98 điểm
+12. Ngành Kỹ thuật xây dựng công trình giao thông (gồm các chương trình: Công nghệ và kỹ thuật xây dựng cầu, đường; Công nghệ và kỹ thuật Đường sắt tốc độ cao và đường sắt đô thị)
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 18.50 điểm
+- Điểm chuẩn xét học bạ: 23.50 điểm
+13. Ngành Quản lý xây dựng
+- Tổ hợp môn: A00; A01; D01; D07; C01; C02; X02; X06
+- Điểm chuẩn thi trung học phổ thông: 19.96 điểm
+- Điểm chuẩn xét học bạ: 24.75 điểm
+14. Ngành Hệ thống thông tin
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 21.75 điểm
+- Điểm chuẩn xét học bạ: 26.29 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 56.02 điểm
+15. Ngành Kỹ thuật phần mềm
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 21.55 điểm
+- Điểm chuẩn xét học bạ: 26.11 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 55.18 điểm
+16. Ngành Kỹ thuật hóa học
+- Tổ hợp môn: A00; D07; C02; C05; B00; X09; X10
+- Điểm chuẩn thi trung học phổ thông: 20.50 điểm
+- Điểm chuẩn xét học bạ: 25.21 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 52.78 điểm
+17. Ngành Công nghệ sinh học
+- Tổ hợp môn: A02; B00; D08; B01; B02; B03; X13; X14
+- Điểm chuẩn thi trung học phổ thông: 18.76 điểm
+- Điểm chuẩn xét học bạ: 23.72 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 48.92 điểm
+18. Ngành Kỹ thuật cơ điện tử
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 23.33 điểm
+- Điểm chuẩn xét học bạ: 28.00 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 62.34 điểm
+19. Ngành Kỹ thuật điều khiển và tự động hóa
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 24.10 điểm
+- Điểm chuẩn xét học bạ: 28.87 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 65.43 điểm
+20. Ngành Công nghệ chế tạo máy (Công nghệ sản xuất tiên tiến, tự động hóa thiết kế cơ khí)
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 20.75 điểm
+- Điểm chuẩn xét học bạ: 25.43 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 53.34 điểm
+21. Ngành Kỹ thuật ô tô
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 22.50 điểm
+- Điểm chuẩn xét học bạ: 27.06 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 58.98 điểm
+22. Ngành Kỹ thuật điện tử - viễn thông (gồm các chương trình: Kỹ thuật điện tử - viễn thông; Công nghệ bán dẫn và thiết kế vi mạch)
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 22.50 điểm
+- Điểm chuẩn xét học bạ: 27.06 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 59.02 điểm
+23. Ngành Trí tuệ nhân tạo và khoa học dữ liệu
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 22.12 điểm
+- Điểm chuẩn xét học bạ: 26.63 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 57.48 điểm
+24. Ngành An ninh mạng
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 22.04 điểm
+- Điểm chuẩn xét học bạ: 26.54 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 57.14 điểm
+25. Ngành Kỹ thuật Robot và Điều khiển thông minh
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X06; X26
+- Điểm chuẩn thi trung học phổ thông: 21.15 điểm
+- Điểm chuẩn xét học bạ: 25.77 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 54.22 điểm
+26. Chương trình tiên tiến ngành Kỹ thuật xây dựng
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 17.00 điểm
+- Điểm chuẩn xét học bạ: 21.00 điểm
+27. Chương trình tiên tiến ngành Kỹ thuật tài nguyên nước
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 17.35 điểm
+- Điểm chuẩn xét học bạ: 21.59 điểm
+28. Ngành Ngôn ngữ Anh
+- Tổ hợp môn: A01; D01; D07; D08; D09; D10; D14; D15
+- Điểm chuẩn thi trung học phổ thông: 22.59 điểm
+- Điểm chuẩn xét học bạ: 27.17 điểm
+- Điểm chuẩn đánh giá tư duy (Tổ hợp môn K00): 59.38 điểm
+29. Ngành Ngôn ngữ Trung Quốc
+- Tổ hợp môn: D01; D04; D45; D55; D63; X37
+- Điểm chuẩn thi trung học phổ thông: 25.45 điểm
+- Điểm chuẩn xét học bạ: 30.00 điểm
+30. Ngành Luật
+- Tổ hợp môn: C00; C03; C04; D01; D14; D15; X01
+- Điểm chuẩn thi trung học phổ thông: 25.17 điểm
+- Điểm chuẩn xét học bạ: 30.00 điểm
+31. Ngành Luật kinh tế
+- Tổ hợp môn: C00; C03; C04; D01; D14; D15; X01
+- Điểm chuẩn thi trung học phổ thông: 25.50 điểm
+- Điểm chuẩn xét học bạ: 30.00 điểm
+32. Ngành Kinh tế
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 21.91 điểm
+- Điểm chuẩn xét học bạ: 26.42 điểm
+33. Ngành Quản trị kinh doanh
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 22.10 điểm
+- Điểm chuẩn xét học bạ: 26.61 điểm
+34. Ngành Kế toán
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 22.25 điểm
+- Điểm chuẩn xét học bạ: 26.78 điểm
+35. Ngành Kinh tế xây dựng
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 20.73 điểm
+- Điểm chuẩn xét học bạ: 25.41 điểm
+36. Ngành Thương mại điện tử
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 22.98 điểm
+- Điểm chuẩn xét học bạ: 27.61 điểm
+37. Ngành Quản trị dịch vụ du lịch và lữ hành
+- Tổ hợp môn: A01; D01; D07; D09; D10
+- Điểm chuẩn thi trung học phổ thông: 21.48 điểm
+- Điểm chuẩn xét học bạ: 26.05 điểm
+38. Ngành Logistics và quản lý chuỗi cung ứng
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 23.00 điểm
+- Điểm chuẩn xét học bạ: 27.63 điểm
+39. Ngành Tài chính - Ngân hàng
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 22.26 điểm
+- Điểm chuẩn xét học bạ: 26.79 điểm
+40. Ngành Kiểm toán
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 21.44 điểm
+- Điểm chuẩn xét học bạ: 26.02 điểm
+41. Ngành Kinh tế số
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 22.11 điểm
+- Điểm chuẩn xét học bạ: 26.62 điểm
+42. Chương trình Kế toán tích hợp chứng chỉ quốc tế
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 18.09 điểm
+- Điểm chuẩn xét học bạ: 22.82 điểm
+43. Chương trình Công nghệ tài chính
+- Tổ hợp môn: A00; A01; D01; D07; C01; X02; X26
+- Điểm chuẩn thi trung học phổ thông: 19.50 điểm
+- Điểm chuẩn xét học bạ: 24.36 điểm
+TỔNG HỢP CÁC NGÀNH CÓ ĐIỂM CHUẨN CAO NHẤT VÀ THẤP NHẤT
+- Ngành có điểm chuẩn cao nhất theo phương thức thi trung học phổ thông: Luật kinh tế (25.50 điểm).
+- Ngành có điểm chuẩn thấp nhất theo phương thức thi trung học phổ thông: Chương trình tiên tiến ngành Kỹ thuật xây dựng (17.00 điểm).
+- Ngành có điểm chuẩn cao nhất theo phương thức xét học bạ: Ngôn ngữ Trung Quốc, Luật, Luật kinh tế (cùng đạt mức 30.00 điểm).
+- Ngành có điểm chuẩn thấp nhất theo phương thức xét học bạ: Chương trình tiên tiến ngành Kỹ thuật xây dựng (21.00 điểm).
+- Ngành có điểm chuẩn cao nhất theo phương thức đánh giá tư duy: Kỹ thuật điều khiển và tự động hóa (65.43 điểm).
+- Ngành có điểm chuẩn thấp nhất theo phương thức đánh giá tư duy: Kỹ thuật môi trường (46.67 điểm).

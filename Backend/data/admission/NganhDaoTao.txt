@@ -1,0 +1,60 @@
+KHOA CÔNG TRÌNH đào tạo gồm 5 ngành :
+- Ngành Xây dựng và quản lí công trình thủy (Kỹ thuật xây dựng công trình thủy) - Mã ngành: 7580202 - Năm xuất hiện: 1959
+- Ngành Kỹ thuật xây dựng dân dụng và công nghiệp (Kỹ thuật xây dựng) - Mã ngành: 7580201 - Năm xuất hiện: Đang cập nhật
+- Ngành Công nghệ kỹ thuật xây dựng - Mã ngành: 7510103 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật xây dựng công trình giao thông - Mã ngành: 7580205 - Năm xuất hiện: Đang cập nhật
+- Ngành Quản lí xây dựng - Mã ngành: 7580302 - Năm xuất hiện: Đang cập nhật
+
+KHOA KỸ THUẬT TÀI NGUYÊN NƯỚC đào tạo gồm 4 ngành :
+- Ngành Kỹ thuật tài nguyên nước - Mã ngành: 7580212 - Năm xuất hiện: 1959 (Tiền thân là ngành Thủy nông)
+- Ngành Tài nguyên nước và môi trường (Thủy văn học) - Mã ngành: 7440224 - Năm xuất hiện: 1959
+- Ngành Kỹ thuật cấp thoát nước - Mã ngành: 7580213 - Năm xuất hiện: Đang cập nhật
+- Ngành Xây dựng và quản lí hạ tầng đô thị (Kỹ thuật cơ sở hạ tầng) - Mã ngành: 7580210 - Năm xuất hiện: Đang cập nhật
+
+KHOA CƠ KHÍ đào tạo gồm 4 ngành :
+- Ngành Kỹ thuật cơ khí - Mã ngành: 7520103 - Năm xuất hiện: 1966
+- Ngành Công nghệ chế tạo máy - Mã ngành: 7510202 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật Ô tô - Mã ngành: 7520130 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật cơ điện tử - Mã ngành: 7520114 - Năm xuất hiện: Đang cập nhật
+
+KHOA CÔNG NGHỆ THÔNG TIN đào tạo gồm 5 ngành :
+- Ngành Công nghệ thông tin - Mã ngành: 7480201 - Năm xuất hiện: 2001
+- Ngành Hệ thống thông tin - Mã ngành: 7480104 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật phần mềm - Mã ngành: 7480103 - Năm xuất hiện: Đang cập nhật
+- Ngành Trí tuệ nhân tạo và khoa học dữ liệu - Mã ngành: 7480205 - Năm xuất hiện: Đang cập nhật
+- Ngành An ninh mạng - Mã ngành: 7480202 - Năm xuất hiện: Đang cập nhật
+
+KHOA ĐIỆN - ĐIỆN TỬ đào tạo gồm 4 ngành : 
+- Ngành Kỹ thuật điện - Mã ngành: 7520201 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật điều khiển và tự động hóa - Mã ngành: 7510303 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật điện tử - viễn thông - Mã ngành: 7520207 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật Robot và Điều khiển thông minh - Mã ngành: 7520206 - Năm xuất hiện: Đang cập nhật
+
+KHOA KINH TẾ VÀ QUẢN LÝ đào tạo gồm 12 ngành : 
+- Ngành Kinh tế - Mã ngành: 7310101 - Năm xuất hiện: Đang cập nhật
+- Ngành Kinh tế xây dựng - Mã ngành: 7580301 - Năm xuất hiện: Đang cập nhật
+- Ngành Logistics và quản lí chuỗi cung ứng - Mã ngành: 7510605 - Năm xuất hiện: Đang cập nhật
+- Ngành Thương mại điện tử - Mã ngành: 7340122 - Năm xuất hiện: Đang cập nhật
+- Ngành Kinh tế số - Mã ngành: 7310109 - Năm xuất hiện: Đang cập nhật
+- Ngành Tài chính - Ngân hàng - Mã ngành: 7340201 - Năm xuất hiện: Đang cập nhật
+- Chương trình Công nghệ tài chính - Mã ngành: 7340201 - Năm xuất hiện: Đang cập nhật
+- Ngành Kiểm toán - Mã ngành: 7340302 - Năm xuất hiện: Đang cập nhật
+- Ngành Quản trị kinh doanh - Mã ngành: 7340101 - Năm xuất hiện: Đang cập nhật
+- Ngành Kế toán - Mã ngành: 7340301 - Năm xuất hiện: Đang cập nhật
+- Chương trình Kế toán tích hợp chứng chỉ quốc tế - Mã ngành: 7340301 - Năm xuất hiện: Đang cập nhật
+- Ngành Quản trị dịch vụ du lịch và lữ hành - Mã ngành: 7810103 - Năm xuất hiện: Đang cập nhật
+
+KHOA HÓA VÀ MÔI TRƯỜNG đào tạo gồm 3 ngành :
+- Ngành Kỹ thuật môi trường - Mã ngành: 7520320 - Năm xuất hiện: 2000
+- Ngành Công nghệ sinh học - Mã ngành: 7420201 - Năm xuất hiện: Đang cập nhật
+- Ngành Kỹ thuật hóa học - Mã ngành: 7520301 - Năm xuất hiện: Đang cập nhật
+
+KHOA LÝ LUẬN CHÍNH TRỊ - PHÁP LUẬT VÀ NGOẠI NGỮ đào tạo gồm 4 ngành :
+- Ngành Luật - Mã ngành: 7380101 - Năm xuất hiện: Đang cập nhật
+- Ngành Luật kinh tế - Mã ngành: 7380107 - Năm xuất hiện: Đang cập nhật
+- Ngành Ngôn ngữ Trung Quốc - Mã ngành: 7220204 - Năm xuất hiện: Đang cập nhật
+- Ngành Ngôn ngữ Anh - Mã ngành: 7220201 - Năm xuất hiện: Đang cập nhật
+
+TRUNG TÂM ĐÀO TẠO QUỐC TẾ đào tạo gồm 2 ngành : 
+- Chương trình tiên tiến ngành Kỹ thuật xây dựng - Mã ngành: 7580201 - Năm xuất hiện: 2008 (Bắt đầu hợp tác quốc tế)
+- Chương trình tiên tiến ngành Kỹ thuật tài nguyên nước - Mã ngành: 7580212 - Năm xuất hiện: 2008 (Bắt đầu hợp tác quốc tế)

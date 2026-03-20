@@ -1,0 +1,135 @@
+- Phần 1 của văn bản quy định về thời gian học và giờ học.
+- Thời gian tổ chức hoạt động giảng dạy đối với sinh viên hệ đại học chính quy là từ 07 giờ 00 phút đến 21 giờ 30 phút, áp dụng từ thứ Hai đến thứ Bảy.
+- Thời lượng của mỗi tiết học là 50 phút.
+
+- Tiết học số 1 bắt đầu lúc 07 giờ 00 phút và kết thúc lúc 07 giờ 50 phút.
+- Tiết học số 2 bắt đầu lúc 07 giờ 55 phút và kết thúc lúc 08 giờ 45 phút.
+- Tiết học số 3 bắt đầu lúc 08 giờ 50 phút và kết thúc lúc 09 giờ 40 phút.
+- Tiết học số 4 bắt đầu lúc 09 giờ 45 phút và kết thúc lúc 10 giờ 35 phút.
+- Tiết học số 5 bắt đầu lúc 10 giờ 40 phút và kết thúc lúc 11 giờ 30 phút.
+- Tiết học số 6 bắt đầu lúc 11 giờ 35 phút và kết thúc lúc 12 giờ 25 phút.
+- Tiết học số 7 bắt đầu lúc 12 giờ 55 phút và kết thúc lúc 13 giờ 45 phút.
+- Tiết học số 8 bắt đầu lúc 13 giờ 50 phút và kết thúc lúc 14 giờ 40 phút.
+- Tiết học số 9 bắt đầu lúc 14 giờ 45 phút và kết thúc lúc 15 giờ 35 phút.
+- Tiết học số 10 bắt đầu lúc 15 giờ 40 phút và kết thúc lúc 16 giờ 30 phút.
+- Tiết học số 11 bắt đầu lúc 16 giờ 35 phút và kết thúc lúc 17 giờ 25 phút.
+- Tiết học số 12 bắt đầu lúc 17 giờ 30 phút và kết thúc lúc 18 giờ 20 phút.
+- Tiết học số 13 bắt đầu lúc 18 giờ 50 phút và kết thúc lúc 19 giờ 40 phút.
+- Tiết học số 14 bắt đầu lúc 19 giờ 45 phút và kết thúc lúc 20 giờ 35 phút.
+- Tiết học số 15 bắt đầu lúc 20 giờ 40 phút và kết thúc lúc 21 giờ 30 phút.
+
+- Phần 2 của văn bản quy định về điểm học phần.
+- Mỗi học phần được đánh giá thông qua tối thiểu hai điểm thành phần.
+- Đối với học phần có số tín chỉ nhỏ hơn 2 tín chỉ, học phần đó có thể chỉ có một điểm đánh giá.
+- Các điểm thành phần của học phần được chấm theo thang điểm 10.
+- Đối với học phần có lý thuyết hoặc học phần vừa có lý thuyết vừa có thực hành, điểm thi kết thúc học phần là bắt buộc.
+- Trọng số của điểm thi kết thúc học phần đối với học phần có lý thuyết hoặc học phần vừa có lý thuyết vừa có thực hành không được thấp hơn 50 phần trăm.
+- Đối với học phần thực hành hoặc học phần thí nghiệm, sinh viên phải tham dự đầy đủ.
+- Đối với học phần thực hành hoặc học phần thí nghiệm, điểm học phần được tính bằng điểm trung bình cộng của các bài thực hành trong học kỳ.
+- Điểm học phần đối với học phần thực hành hoặc học phần thí nghiệm được làm tròn đến 1 chữ số sau dấu phẩy.
+
+- Phần 3 của văn bản quy định về điều kiện dự thi kết thúc học phần.
+
+- Đối với học phần chỉ có lý thuyết, sinh viên phải có mặt trên lớp từ 80 phần trăm trở lên so với thời gian quy định của học phần.
+- Đối với học phần chỉ có lý thuyết, sinh viên phải tham dự ít nhất 50 phần trăm số lần kiểm tra.
+- Đối với học phần chỉ có lý thuyết, điểm trung bình các bài kiểm tra của sinh viên phải đạt từ 4,0 trở lên.
+
+- Đối với học phần chỉ có thực hành hoặc chỉ có thí nghiệm, sinh viên phải tham dự đầy đủ thời gian học theo quy định của học phần.
+- Đối với học phần chỉ có thực hành hoặc chỉ có thí nghiệm, sinh viên phải thực hiện đúng các quy định của học phần.
+
+- Đối với học phần có cả lý thuyết và bài tập, hoặc có cả lý thuyết và thí nghiệm, hoặc có cả lý thuyết và thực hành, sinh viên phải có mặt ở phần lý thuyết từ 80 phần trăm trở lên so với thời gian quy định.
+- Đối với học phần có cả lý thuyết và bài tập, hoặc có cả lý thuyết và thí nghiệm, hoặc có cả lý thuyết và thực hành, sinh viên phải tham dự ít nhất 80 phần trăm số giờ của phần bài tập, phần thí nghiệm hoặc phần thực hành theo quy định.
+- Đối với học phần có cả lý thuyết và bài tập, hoặc có cả lý thuyết và thí nghiệm, hoặc có cả lý thuyết và thực hành, sinh viên phải tham dự ít nhất 50 phần trăm số lần kiểm tra.
+- Đối với học phần có cả lý thuyết và bài tập, hoặc có cả lý thuyết và thí nghiệm, hoặc có cả lý thuyết và thực hành, điểm trung bình các bài kiểm tra của sinh viên phải đạt từ 4,0 trở lên.
+
+- Nếu sinh viên không đủ điều kiện dự thi kết thúc học phần thì sinh viên nhận điểm 0 cho học phần đó.
+- Nếu sinh viên vắng mặt trong buổi thi hoặc buổi đánh giá mà không có lý do chính đáng thì sinh viên nhận điểm 0 cho học phần đó.
+
+- Phần 4 của văn bản quy định về xếp loại điểm chữ theo thang điểm 10.
+
+- Điểm chữ A là mức điểm đạt, áp dụng cho điểm số từ 8,5 đến 10,0.
+- Điểm chữ B là mức điểm đạt, áp dụng cho điểm số từ 7,0 đến 8,4.
+- Điểm chữ C là mức điểm đạt, áp dụng cho điểm số từ 5,5 đến 6,9.
+- Điểm chữ D là mức điểm đạt, áp dụng cho điểm số từ 4,0 đến 5,4.
+- Điểm chữ F là mức điểm không đạt, áp dụng cho điểm số dưới 4,0.
+- Điểm chữ F thể hiện học phần bị trượt hoặc sinh viên không đạt yêu cầu của học phần.
+
+- Ký hiệu P được áp dụng cho học phần chỉ yêu cầu đạt.
+- Ký hiệu P được dùng khi sinh viên đạt từ 5,0 điểm trở lên đối với học phần chỉ yêu cầu đạt.
+- Ký hiệu P không được tính vào điểm trung bình học tập.
+- Ký hiệu I là điểm chưa hoàn thiện do sinh viên được phép hoãn thi hoặc hoãn kiểm tra.
+- Ký hiệu X là điểm chưa hoàn thiện do chưa đủ dữ liệu để đánh giá.
+- Ký hiệu R là điểm học phần được miễn học và được công nhận tín chỉ.
+
+- Phần 5 của văn bản quy định về quy đổi sang thang điểm 4.
+- Điểm chữ A được quy đổi thành 4,0 theo thang điểm 4.
+- Điểm chữ B được quy đổi thành 3,0 theo thang điểm 4.
+- Điểm chữ C được quy đổi thành 2,0 theo thang điểm 4.
+- Điểm chữ D được quy đổi thành 1,0 theo thang điểm 4.
+- Điểm chữ F được quy đổi thành 0,0 theo thang điểm 4.
+
+- GPA là viết tắt của Grade Point Average.
+- GPA có nghĩa là điểm trung bình.
+- Trong bối cảnh học tập của sinh viên, GPA là điểm trung bình được tính theo thang điểm 4.
+- GPA học kỳ là điểm trung bình chung học kỳ theo thang điểm 4.
+- GPA tích lũy là điểm trung bình chung tích lũy của toàn bộ các học phần đã tích lũy theo thang điểm 4.
+- Điểm trung bình chung học kỳ và điểm trung bình chung tích lũy đều là các dạng GPA.
+
+- Cách tính GPA theo thang điểm 4 được thực hiện theo nguyên tắc lấy điểm quy đổi của từng học phần nhân với số tín chỉ của học phần đó.
+- Tổng điểm dùng để tính GPA bằng tổng của tất cả các tích giữa điểm quy đổi theo thang điểm 4 và số tín chỉ tương ứng của từng học phần.
+- Tổng số tín chỉ dùng để tính GPA bằng tổng số tín chỉ của các học phần được đưa vào tính điểm trung bình.
+- Công thức tính GPA là: tổng của (điểm học phần theo thang điểm 4 nhân với số tín chỉ của học phần) chia cho tổng số tín chỉ của các học phần được tính.
+- Công thức tính GPA học kỳ là: tổng của (điểm quy đổi thang điểm 4 của từng học phần trong học kỳ nhân với số tín chỉ của học phần đó) chia cho tổng số tín chỉ của các học phần được tính trong học kỳ.
+- Công thức tính GPA tích lũy là: tổng của (điểm quy đổi thang điểm 4 của tất cả các học phần tích lũy nhân với số tín chỉ của từng học phần) chia cho tổng số tín chỉ tích lũy được tính vào điểm trung bình.
+
+- Ví dụ cách tính GPA học kỳ như sau.
+- Nếu sinh viên học 3 học phần trong một học kỳ, trong đó học phần thứ nhất có 3 tín chỉ và đạt điểm chữ A tương đương 4,0 điểm, học phần thứ hai có 2 tín chỉ và đạt điểm chữ B tương đương 3,0 điểm, học phần thứ ba có 2 tín chỉ và đạt điểm chữ C tương đương 2,0 điểm, thì GPA học kỳ được tính bằng công thức: ((4,0 nhân 3) + (3,0 nhân 2) + (2,0 nhân 2)) chia cho (3 + 2 + 2).
+- Trong ví dụ này, GPA học kỳ bằng (12 + 6 + 4) chia cho 7.
+- Trong ví dụ này, GPA học kỳ bằng 22 chia cho 7.
+- Trong ví dụ này, GPA học kỳ xấp xỉ bằng 3,14 theo thang điểm 4.
+
+- Các học phần có ký hiệu P không được tính vào GPA.
+- Các học phần có ký hiệu I không phải là điểm hoàn chỉnh nên chưa đủ điều kiện để tính ổn định vào GPA.
+- Các học phần có ký hiệu X không phải là điểm hoàn chỉnh nên chưa đủ điều kiện để tính ổn định vào GPA.
+- Các học phần có ký hiệu R là học phần được miễn học và công nhận tín chỉ, nên việc tính vào GPA phải tuân theo quy định cụ thể của nhà trường nếu có áp dụng.
+- Học phần bị điểm chữ F tương đương 0,0 điểm theo thang điểm 4 và ảnh hưởng làm giảm GPA nếu học phần đó được tính vào điểm trung bình.
+
+- Phần 6 của văn bản quy định về điểm trung bình và cách sử dụng điểm trung bình.
+- Điểm trung bình chung học kỳ, tức GPA học kỳ, được dùng để xét học bổng.
+- Điểm trung bình chung học kỳ, tức GPA học kỳ, được dùng để xét cảnh báo học tập.
+- Điểm trung bình chung học kỳ, tức GPA học kỳ, được dùng để xét thôi học sau mỗi học kỳ.
+- Điểm trung bình chung học kỳ, tức GPA học kỳ, được dùng để xét khen thưởng sau mỗi năm học.
+- Điểm trung bình chung tích lũy, tức GPA tích lũy, được dùng để xét cảnh báo học tập.
+- Điểm trung bình chung tích lũy, tức GPA tích lũy, được dùng để xét thôi học.
+- Điểm trung bình chung tích lũy, tức GPA tích lũy, được dùng để xếp hạng học lực của sinh viên.
+- Điểm trung bình chung tích lũy, tức GPA tích lũy, được dùng để xếp hạng tốt nghiệp.
+
+- Phần 7 của văn bản quy định về cảnh báo học tập.
+- Việc xét cảnh báo học tập được thực hiện vào cuối mỗi học kỳ chính.
+- Sinh viên bị cảnh báo học tập nếu GPA học kỳ dưới 0,80 trong học kỳ đầu tiên của khóa học.
+- Sinh viên bị cảnh báo học tập nếu GPA học kỳ dưới 1,00 trong các học kỳ tiếp theo sau học kỳ đầu tiên.
+- Sinh viên bị cảnh báo học tập nếu tổng số tín chỉ của các học phần bị điểm chữ F còn tồn đọng vượt quá 24 tín chỉ.
+
+- Cảnh báo học tập mức 1 được áp dụng khi sinh viên lần đầu tiên rơi vào điều kiện bị cảnh báo học tập.
+- Cảnh báo học tập mức 2 được áp dụng khi sinh viên tiếp tục rơi vào điều kiện bị cảnh báo học tập và đã bị cảnh báo học tập mức 1 ở học kỳ trước liền kề.
+- Cảnh báo học tập mức 3 được áp dụng khi sinh viên tiếp tục rơi vào điều kiện bị cảnh báo học tập và đã bị cảnh báo học tập mức 2 ở học kỳ trước liền kề.
+
+- Phần 8 của văn bản quy định về điều kiện tốt nghiệp liên quan đến điểm.
+- Sinh viên được xét tốt nghiệp khi đã tích lũy đủ các học phần theo yêu cầu của chương trình đào tạo.
+- Sinh viên được xét tốt nghiệp khi đã tích lũy đủ số tín chỉ theo yêu cầu của chương trình đào tạo.
+- Sinh viên được xét tốt nghiệp khi GPA tích lũy toàn khóa đạt từ 2,00 trên thang điểm 4 trở lên.
+- Nói cách khác, sinh viên được xét tốt nghiệp khi điểm trung bình chung tích lũy toàn khóa đạt từ 2,00 trên thang điểm 4 trở lên.
+- Ngoài điều kiện về điểm và số tín chỉ, sinh viên còn phải đáp ứng các điều kiện khác theo quy định của nhà trường để được xét tốt nghiệp.
+
+- Phần 9 của văn bản quy định về xếp loại tốt nghiệp.
+- Xếp loại tốt nghiệp Xuất sắc được áp dụng khi GPA tích lũy toàn khóa từ 3,60 đến 4,00.
+- Xếp loại tốt nghiệp Giỏi được áp dụng khi GPA tích lũy toàn khóa từ 3,20 đến 3,59.
+- Xếp loại tốt nghiệp Khá được áp dụng khi GPA tích lũy toàn khóa từ 2,50 đến 3,19.
+- Xếp loại tốt nghiệp Trung bình khá được áp dụng khi GPA tích lũy toàn khóa từ 2,30 đến 2,49.
+- Xếp loại tốt nghiệp Trung bình được áp dụng khi GPA tích lũy toàn khóa từ 2,00 đến 2,29.
+- Nói cách khác, các mức xếp loại tốt nghiệp được xác định theo điểm trung bình chung tích lũy toàn khóa trên thang điểm 4.
+
+- Xếp loại tốt nghiệp Xuất sắc có thể bị giảm 1 mức trong một số trường hợp đặc biệt.
+- Xếp loại tốt nghiệp Giỏi có thể bị giảm 1 mức trong một số trường hợp đặc biệt.
+- Trường hợp thứ nhất làm giảm 1 mức xếp loại tốt nghiệp Xuất sắc hoặc Giỏi là khi khối lượng học phần mà sinh viên phải học lại vượt quá 5 phần trăm tổng số tín chỉ của toàn bộ chương trình đào tạo.
+- Trường hợp thứ hai làm giảm 1 mức xếp loại tốt nghiệp Xuất sắc hoặc Giỏi là khi sinh viên bị kỷ luật từ mức cảnh cáo trở lên trong thời gian học.

@@ -1,0 +1,10 @@
+- THÔNG BÁO: Kế hoạch tổ chức thi chuẩn Tiếng Anh đầu ra :
+- 1. Đối tượng áp dụng: Sinh viên hệ đại học chính quy tại Phân hiệu. Sinh viên có nhu cầu thi chuẩn đầu ra tiếng Anh trình độ đại học.
+- 2. Hình thức bài thi: Bài thi đánh giá năng lực tiếng Anh gồm 4 kỹ năng: Kỹ năng Đọc, Kỹ năng Viết, Kỹ năng Nghe, Kỹ năng Nói.
+- 3. Thời gian làm bài thi: Kỹ năng Đọc và Viết có thời gian làm bài là 90 phút.
+- 3. Thời gian làm bài thi: Kỹ năng Nghe có thời gian là 35 phút (Bao gồm cả thời gian đọc đề).
+- 3. Thời gian làm bài thi: Kỹ năng Nói có thời gian là 10 phút / sinh viên.
+- 4. Cách tính điểm bài thi: Tổng điểm bài thi, tổng điểm tối đa là 100 điểm.
+- 4. Cách tính điểm bài thi (Phân bố điểm từng kỹ năng): Đọc: 30 điểm; Viết: 30 điểm; Nghe: 20 điểm; Nói: 20 điểm.
+- 5. Điều kiện đạt chuẩn tiếng Anh đầu ra: Sinh viên được công nhận đạt chuẩn khi tổng điểm ≥ 50 điểm, đồng thời mỗi kỹ năng phải đạt ≥ 30% điểm tối đa của kỹ năng đó.
+- 5. Điều kiện đạt chuẩn tiếng Anh đầu ra (Điểm liệt từng kỹ năng): Nếu thấp hơn các mức sau thì không đạt chuẩn: Đọc: dưới 9 điểm; Viết: dưới 9 điểm; Nghe: dưới 6 điểm; Nói: dưới 6 điểm.

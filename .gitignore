@@ -1,0 +1,36 @@
+# Python
+Backend/venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+
+# Node
+Frontend/node_modules/
+node_modules/
+.next/
+dist/
+build/
+
+# Local data / db
+Backend/app.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Frontend env
+Frontend/.env.local
+.env.local
+
+# Vector DB / local indexes
+Backend/chroma_db/
+chroma_db/

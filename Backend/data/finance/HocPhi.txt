@@ -1,0 +1,36 @@
+- Tên văn bản là Quy định mức thu học phí năm học 2024 – 2025 của Trường Đại học Thủy lợi.
+- Phạm vi áp dụng của quy định thu học phí năm học 2024 – 2025 chỉ dành cho sinh viên hệ đại học chính quy.
+- Học phí năm học 2024 – 2025 của Trường Đại học Thủy lợi được tính theo số tín chỉ sinh viên đăng ký trong học kỳ.
+
+- Mức học phí của ngành Kế toán (thuộc khối ngành Kinh tế – Quản lý) là 350.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Quản trị kinh doanh (thuộc khối ngành Kinh tế – Quản lý) là 350.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kinh tế (thuộc khối ngành Kinh tế – Quản lý) là 350.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kinh tế xây dựng (thuộc khối ngành Kinh tế – Quản lý) là 350.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Thương mại điện tử (thuộc khối ngành Kinh tế – Quản lý) là 350.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Logistics và quản lý chuỗi cung ứng (thuộc khối ngành Kinh tế – Quản lý) là 350.000 đồng trên một tín chỉ.
+
+- Mức học phí của ngành Công nghệ thông tin (thuộc khối ngành Công nghệ thông tin) là 420.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Trí tuệ nhân tạo (thuộc khối ngành Công nghệ thông tin) là 420.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Hệ thống thông tin (thuộc khối ngành Công nghệ thông tin) là 420.000 đồng trên một tín chỉ.
+
+- Mức học phí của ngành Kỹ thuật xây dựng công trình thủy (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật xây dựng dân dụng và công nghiệp (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Công nghệ kỹ thuật xây dựng (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật xây dựng công trình giao thông (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Quản lý xây dựng (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật cơ khí (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật ô tô (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật điện (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật điện tử – viễn thông (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật điều khiển và tự động hóa (thuộc khối ngành Kỹ thuật) là 380.000 đồng trên một tín chỉ.
+
+- Mức học phí của ngành Tài nguyên nước (thuộc khối ngành Tài nguyên – Môi trường) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật tài nguyên nước (thuộc khối ngành Tài nguyên – Môi trường) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật cấp thoát nước (thuộc khối ngành Tài nguyên – Môi trường) là 380.000 đồng trên một tín chỉ.
+- Mức học phí của ngành Kỹ thuật môi trường (thuộc khối ngành Tài nguyên – Môi trường) là 380.000 đồng trên một tín chỉ.
+
+- Cách tính học phí mỗi học kỳ được tính bằng công thức lấy số tín chỉ sinh viên đăng ký nhân với mức học phí tương ứng của ngành.
+- Ví dụ cách tính học phí: Sinh viên học 18 tín chỉ ngành Công nghệ thông tin sẽ đóng mức học phí bằng 18 nhân với 420.000 đồng, tổng cộng là 7.560.000 đồng cho một học kỳ.
+- Quy định thu học phí yêu cầu sinh viên phải đóng học phí theo từng học kỳ.
+- Quy định thu học phí nêu rõ nếu sinh viên đăng ký nhiều tín chỉ hơn thì số tiền học phí sẽ tăng tương ứng.
+- Quy định thu học phí yêu cầu sinh viên học lại hoặc sinh viên học cải thiện điểm phải đóng học phí theo số tín chỉ học lại.

@@ -1,0 +1,116 @@
+THÔNG TIN VỀ ĐĂNG KÝ TÍN CHỈ TRƯỜNG ĐẠI HỌC THỦY LỢI
+
+1. NGUYÊN TẮC CHUNG
+- Trường Đại học Thủy lợi đào tạo theo đơn vị tín chỉ.
+- Tín chỉ là đơn vị dùng để tính khối lượng học tập và tích lũy của sinh viên.
+- Sinh viên học theo tín chỉ được học theo kế hoạch học tập cá nhân, phù hợp với kế hoạch giảng dạy của nhà trường.
+- Sinh viên phải đăng ký lớp học phần cho các học phần dự định học trong mỗi học kỳ.
+
+2. SINH VIÊN PHẢI ĐĂNG KÝ NHỮNG GÌ
+- Sinh viên học theo tín chỉ phải đăng ký các lớp học phần dự định học trong học kỳ.
+- Bao gồm:
+  + Học phần mới.
+  + Học phần chưa đạt để học lại.
+  + Học phần đã đạt để cải thiện điểm, nếu có.
+- Việc đăng ký căn cứ vào:
+  + Danh sách học phần được mở.
+  + Điều kiện đăng ký của từng học phần.
+
+3. ĐĂNG KÝ HỌC ĐỐI VỚI SINH VIÊN HỌC THEO NIÊN CHẾ
+- Sinh viên học theo niên chế đăng ký học lại các học phần chưa đạt.
+- Có thể đăng ký học cải thiện điểm.
+- Có thể đăng ký học các học phần tự chọn theo chương trình đào tạo.
+
+4. ĐIỀU KIỆN ĐĂNG KÝ HỌC PHẦN
+- Đề cương chi tiết của mỗi học phần phải thể hiện rõ:
+  + Số lượng tín chỉ.
+  + Điều kiện ràng buộc học phần.
+  + Học phần tiên quyết.
+  + Học phần học trước.
+  + Học phần song hành, nếu có.
+- Muốn đăng ký học phần B:
+  + Nếu học phần A là học phần tiên quyết của B, sinh viên phải học và đạt học phần A trước.
+  + Nếu học phần A là học phần học trước của B, sinh viên phải đăng ký học học phần A trước đó.
+- Ngoài ra còn phải căn cứ điều kiện cụ thể của từng học phần được nhà trường công bố.
+
+5. GIỚI HẠN SỐ TÍN CHỈ ĐĂNG KÝ TRONG MỖI HỌC KỲ
+- Khối lượng học tập tối thiểu trong một học kỳ: không ít hơn 11 tín chỉ.
+- Khối lượng học tập tối đa trong một học kỳ: không vượt quá 26 tín chỉ.
+- Trường hợp đặc biệt như sinh viên có sức khỏe yếu hoặc sinh viên học cùng lúc hai văn bằng, nhà trường có thể xem xét điều chỉnh giới hạn này.
+
+6. HỆ THỐNG ĐĂNG KÝ
+- Trước khi bắt đầu mỗi học kỳ, Phòng Đào tạo hướng dẫn cho sinh viên đăng ký học tập trên Hệ thống đăng ký học tập của Trường.
+- Sinh viên thực hiện đăng ký học trên hệ thống theo hướng dẫn của Phòng Đào tạo.
+
+7. QUY TRÌNH ĐĂNG KÝ HỌC CHO SINH VIÊN
+Bước 1: Đăng ký nguyện vọng học
+- Nhà trường tổ chức đăng ký nguyện vọng học để thu thập dữ liệu nguyện vọng học tập của sinh viên theo từng học phần.
+- Việc này diễn ra trước khi vào học khoảng 4 tuần.
+
+Bước 2: Đăng ký học cho sinh viên chính khóa
+- Tổ chức đăng ký học cho sinh viên chính khóa.
+- Việc đăng ký theo đúng kế hoạch và chương trình đào tạo của lớp quản lý.
+
+Bước 3: Xét nguyện vọng cho sinh viên
+- Xét nguyện vọng cho sinh viên đã đăng ký nguyện vọng.
+- Mức độ ưu tiên khi xét:
+  + Khóa cũ ưu tiên hơn khóa mới.
+  + Học lại ưu tiên hơn học nâng điểm và học chưa học.
+
+Bước 4: Đăng ký học khác khóa
+- Sau bước xét nguyện vọng, nhà trường tổ chức đăng ký học khác khóa.
+- Bao gồm:
+  + Học lại.
+  + Học nâng điểm.
+  + Học vượt cùng khóa trước.
+  + Học lại cùng khóa sau.
+  + Học khác lớp quản lý.
+- Nhà trường tiếp nhận đơn để giải quyết các trường hợp đặc biệt không thể tự thao tác trên phần mềm.
+- Ví dụ:
+  + Đã tốt nghiệp văn bằng thứ nhất.
+  + Sinh viên đăng ký khác cơ sở đào tạo.
+  + Các trường hợp đặc biệt khác.
+- Trong giai đoạn này, nhà trường theo dõi quá trình đăng ký và cân đối sĩ số lớp học phần.
+- Bước này diễn ra 2 lần trong 1 tuần ngay trước khi bắt đầu giai đoạn học:
+  + Một lần trước khi bắt đầu giai đoạn 1.
+  + Một lần trước khi bắt đầu giai đoạn 2.
+
+Bước 5: Rà soát dữ liệu đăng ký học
+- Nhà trường rà soát dữ liệu đăng ký học của sinh viên.
+- Có thể hủy hoặc ghép lớp đối với những lớp có sĩ số dưới 20 sinh viên mỗi lớp.
+- Ngoại lệ:
+  + Học phần thực hành.
+  + Học phần thí nghiệm.
+  + Các học phần thuộc khối kiến thức ngành, chuyên ngành của các ngành ít sinh viên.
+- Trường hợp đặc biệt do Ban Giám hiệu xem xét quyết định hoặc ủy quyền cho Trưởng phòng Đào tạo quyết định.
+- Nhà trường có thể tách một số lớp lý thuyết có sĩ số đăng ký quá đông.
+- Sau đó thông báo tới bộ môn và sinh viên liên quan để phối hợp thực hiện.
+
+Bước 6: Hoàn thiện thời khóa biểu chính thức
+- Nhà trường hoàn thiện và gửi thời khóa biểu chính thức cho các đơn vị, giảng viên và sinh viên để triển khai giảng dạy và học tập.
+
+8. THỜI ĐIỂM LIÊN QUAN ĐẾN ĐĂNG KÝ HỌC
+- Thời khóa biểu cập nhật được gửi tới bộ môn và sinh viên để chuẩn bị cho kế hoạch đăng ký học, thường trước khi vào học kỳ mới 2 tuần.
+- Đăng ký nguyện vọng thường diễn ra trước khi vào học khoảng 4 tuần.
+- Giai đoạn đăng ký học khác khóa diễn ra ngay trước khi bắt đầu các giai đoạn học.
+
+9. MỘT SỐ TRƯỜNG HỢP ĐẶC BIỆT
+- Sinh viên học cùng lúc hai chương trình nếu có nguyện vọng học chương trình thứ hai thì phải làm đơn nộp cho Phòng Đào tạo trước mỗi học kỳ ít nhất 1 tháng.
+- Người học liên thông thực hiện chương trình đào tạo và đăng ký học tập theo kế hoạch chung như các sinh viên khác cùng hình thức đào tạo.
+- Trên cơ sở công nhận và chuyển đổi tín chỉ, sinh viên có thể được miễn trừ các học phần tương ứng với khối lượng học tập đã tích lũy trước đó.
+
+10. CÁC KHÁI NIỆM LIÊN QUAN ĐẾN ĐĂNG KÝ TÍN CHỈ
+- Học phần bắt buộc: sinh viên bắt buộc phải tích lũy.
+- Học phần tự chọn: sinh viên được chọn theo hướng dẫn của trường để đáp ứng chương trình đào tạo.
+- Học phần thay thế tương đương: học phần dùng để thay thế học phần cũ không còn tổ chức đào tạo.
+- Học phần tiên quyết: phải học và đạt trước khi đăng ký học phần sau.
+- Học phần học trước: phải đăng ký học trước khi đăng ký học phần sau.
+- Học phần song hành: học phần có thể hoặc phải học cùng thời điểm theo quy định của chương trình.
+
+11. LƯU Ý QUAN TRỌNG
+- Sinh viên không đăng ký tự do hoàn toàn, mà phải theo:
+  + Danh sách học phần được mở.
+  + Điều kiện đăng ký của từng học phần.
+  + Kế hoạch đào tạo và thời khóa biểu của nhà trường.
+- Nhà trường có thể ghép lớp, hủy lớp hoặc tách lớp tùy theo sĩ số thực tế.
+- Các trường hợp đặc biệt không thao tác được trên phần mềm phải làm đơn để được xem xét giải quyết.

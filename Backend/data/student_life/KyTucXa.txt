@@ -1,0 +1,92 @@
+- Chủ đề của dữ liệu là thông tin về ký túc xá của Trường Đại học Thủy lợi.
+
+- Ký túc xá của Trường Đại học Thủy lợi do Trung tâm Nội trú quản lý.
+- Trung tâm Nội trú của Trường Đại học Thủy lợi có chức năng quản lý và bảo đảm các điều kiện sinh hoạt trong khu nội trú.
+- Trung tâm Nội trú của Trường Đại học Thủy lợi có chức năng bảo đảm an ninh và trật tự trong khu nội trú.
+- Trung tâm Nội trú của Trường Đại học Thủy lợi có chức năng quản lý và bảo đảm dịch vụ ăn uống và căng tin trong khu nội trú.
+- Theo cơ cấu tổ chức công khai của Trường Đại học Thủy lợi, Trung tâm Nội trú là đơn vị tham mưu và giúp việc Hiệu trưởng trong công tác nội trú.
+
+- Văn phòng của Trung tâm Nội trú đặt tại Phòng 303 Ký túc xá K1.
+- Văn phòng của Trung tâm Nội trú đặt tại Phòng 305 Ký túc xá K1.
+- Văn phòng của Trung tâm Nội trú đặt tại Phòng 601 Ký túc xá K1.
+- Văn phòng của Trung tâm Nội trú đặt tại Phòng 701 Ký túc xá K1.
+- Văn phòng của Trung tâm Nội trú còn gắn với Nhà 2.
+- Văn phòng của Trung tâm Nội trú còn gắn với Nhà 3.
+- Văn phòng của Trung tâm Nội trú còn gắn với Nhà 4.
+- Số điện thoại liên hệ của Trung tâm Nội trú là 0243.5643058.
+- Số điện thoại liên hệ của Trung tâm Nội trú là 0243.5643059.
+- Thư điện tử liên hệ của Trung tâm Nội trú là noitru@tlu.edu.vn.
+
+- Trường Đại học Thủy lợi đã đưa khu ký túc xá mới cao 11 tầng vào sử dụng từ tháng 7 năm 2011.
+- Khu ký túc xá mới cao 11 tầng của Trường Đại học Thủy lợi có diện tích đất xây dựng khoảng 2.100 mét vuông.
+- Khu ký túc xá mới cao 11 tầng của Trường Đại học Thủy lợi có diện tích sử dụng hơn 20.000 mét vuông.
+
+- Tầng hầm của khu ký túc xá 11 tầng được dùng làm nơi để xe.
+- Tầng 1 của khu ký túc xá 11 tầng có khu căng tin phục vụ ăn uống cho sinh viên.
+- Tầng 2 của khu ký túc xá 11 tầng có một số phòng làm việc.
+- Tầng 2 của khu ký túc xá 11 tầng có khu sinh hoạt chung cho sinh viên.
+- Diện tích khu sinh hoạt chung cho sinh viên ở tầng 2 của khu ký túc xá 11 tầng khoảng 600 mét vuông.
+- Từ tầng 3 đến tầng 11 của khu ký túc xá 11 tầng là các phòng ở dành cho sinh viên.
+
+- Theo bài giới thiệu năm 2011 của Trường Đại học Thủy lợi, mỗi tầng của khu ký túc xá 11 tầng có 28 phòng ở.
+- Theo bài giới thiệu năm 2011 của Trường Đại học Thủy lợi, mỗi tầng của khu ký túc xá 11 tầng có 2 phòng sinh hoạt chung.
+- Theo bài giới thiệu năm 2011 của Trường Đại học Thủy lợi, mỗi phòng ở của khu ký túc xá 11 tầng dành cho 8 sinh viên.
+- Theo bài giới thiệu năm 2011 của Trường Đại học Thủy lợi, phòng ở trong khu ký túc xá 11 tầng là phòng khép kín.
+- Theo bài giới thiệu năm 2011 của Trường Đại học Thủy lợi, phòng ở trong khu ký túc xá 11 tầng có nội thất cơ bản.
+
+- Theo một trang giới thiệu cơ sở vật chất của Trường Đại học Thủy lợi, khu ký túc xá của trường gồm 2 tòa nhà cao 11 tầng.
+- Theo một trang giới thiệu cơ sở vật chất của Trường Đại học Thủy lợi, 2 tòa nhà cao 11 tầng của khu ký túc xá có khoảng 300 phòng được trang bị hiện đại.
+- Theo một trang giới thiệu cơ sở vật chất của Trường Đại học Thủy lợi, khu ký túc xá của trường còn có 3 dãy nhà cao 3 tầng.
+- Theo một trang giới thiệu cơ sở vật chất của Trường Đại học Thủy lợi, 3 dãy nhà cao 3 tầng của khu ký túc xá có khoảng 270 phòng ở.
+- Theo một trang giới thiệu cơ sở vật chất của Trường Đại học Thủy lợi, trong phòng ở ký túc xá có giường tầng.
+- Theo một trang giới thiệu cơ sở vật chất của Trường Đại học Thủy lợi, trong phòng ở ký túc xá có công trình phụ khép kín.
+- Theo một trang giới thiệu cơ sở vật chất của Trường Đại học Thủy lợi, điện, nước và các dịch vụ hỗ trợ trong khu ký túc xá được cung cấp đầy đủ.
+
+- Trường Đại học Thủy lợi mô tả khu ký túc xá là khu nhà ở cho sinh viên được xây dựng đồng bộ.
+- Trường Đại học Thủy lợi cho biết khu ký túc xá có thang máy.
+- Trường Đại học Thủy lợi cho biết khu ký túc xá có các khu vực sử dụng chung thuận lợi.
+- Diện tích một phòng trong khu ký túc xá mới của Trường Đại học Thủy lợi khoảng 32 mét vuông.
+- Các phòng ở trong khu ký túc xá mới của Trường Đại học Thủy lợi có quạt trần.
+- Các phòng ở trong khu ký túc xá mới của Trường Đại học Thủy lợi có giường tầng.
+- Các phòng ở trong khu ký túc xá mới của Trường Đại học Thủy lợi có bàn học tiện lợi.
+- Các phòng ở trong khu ký túc xá mới của Trường Đại học Thủy lợi có nhà vệ sinh khép kín.
+- Nhà trường cho biết phí phòng ở, phí điện và phí nước trong khu ký túc xá được thực hiện theo hướng công khai và đúng quy định.
+
+- Trường Đại học Thủy lợi từng cho biết nhờ các khu ký túc xá đã hoàn thiện, mỗi khóa học trường có thể tiếp nhận trên 1.000 sinh viên mới vào ở ký túc xá.
+- Trong năm học 2018 đến năm học 2019, Trường Đại học Thủy lợi dành hơn 1.000 chỗ ở ký túc xá cho sinh viên khóa 60.
+- Trong thông báo đăng ký nội trú cho sinh viên khóa 63 năm 2021, số lượng chỗ ở ký túc xá được công bố là 700.
+
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên bị khuyết tật là một nhóm được ưu tiên xét ở nội trú.
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên là con liệt sĩ là một nhóm được ưu tiên xét ở nội trú.
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên là con thương binh là một nhóm được ưu tiên xét ở nội trú.
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên là con bệnh binh là một nhóm được ưu tiên xét ở nội trú.
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên là con của người hưởng chính sách như thương binh là một nhóm được ưu tiên xét ở nội trú.
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên là con của người có công là một nhóm được ưu tiên xét ở nội trú.
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên có hộ khẩu thường trú tại vùng cao là một nhóm được ưu tiên xét ở nội trú.
+- Theo thông báo đăng ký nội trú công khai của Trường Đại học Thủy lợi năm 2021, sinh viên có hộ khẩu thường trú tại vùng có điều kiện kinh tế, xã hội đặc biệt khó khăn là một nhóm được ưu tiên xét ở nội trú.
+
+- Các bài viết của Trường Đại học Thủy lợi cũng cho thấy nhà trường ưu tiên sinh viên nữ trong bố trí chỗ ở ký túc xá.
+- Các bài viết của Trường Đại học Thủy lợi cũng cho thấy nhà trường ưu tiên sinh viên diện chính sách trong bố trí chỗ ở ký túc xá.
+- Các bài viết của Trường Đại học Thủy lợi cũng cho thấy nhà trường ưu tiên sinh viên ở tỉnh xa trong bố trí chỗ ở ký túc xá.
+- Các bài viết của Trường Đại học Thủy lợi cũng cho thấy nhà trường ưu tiên sinh viên có hoàn cảnh khó khăn trong bố trí chỗ ở ký túc xá.
+- Các bài viết của Trường Đại học Thủy lợi cũng cho thấy nhà trường ưu tiên lưu học sinh nước ngoài trong bố trí chỗ ở ký túc xá.
+
+- Trường Đại học Thủy lợi ưu tiên bố trí ký túc xá cho lưu học sinh nước ngoài.
+- Trường Đại học Thủy lợi ưu tiên bố trí ký túc xá cho sinh viên có hoàn cảnh khó khăn.
+- Trong năm 2025, Trường Đại học Thủy lợi thông báo miễn lệ phí ở ký túc xá cho sinh viên năm thứ nhất có hoàn cảnh khó khăn và có xác nhận của chính quyền địa phương.
+- Trong năm 2025, Trường Đại học Thủy lợi thông báo miễn lệ phí ở ký túc xá trong toàn khóa học cho lưu học sinh nước ngoài đăng ký tự túc.
+- Dịp Tết năm 2025, Trường Đại học Thủy lợi bố trí cho toàn bộ lưu học sinh Lào ở lại ký túc xá.
+- Dịp Tết năm 2025, Trường Đại học Thủy lợi bảo đảm điện cho lưu học sinh Lào ở lại ký túc xá.
+- Dịp Tết năm 2025, Trường Đại học Thủy lợi bảo đảm nước cho lưu học sinh Lào ở lại ký túc xá.
+- Dịp Tết năm 2025, Trường Đại học Thủy lợi bảo đảm y tế cho lưu học sinh Lào ở lại ký túc xá.
+- Dịp Tết năm 2025, Trường Đại học Thủy lợi bảo đảm internet cho lưu học sinh Lào ở lại ký túc xá.
+- Dịp Tết năm 2025, Trường Đại học Thủy lợi bảo đảm an ninh và trật tự cho lưu học sinh Lào ở lại ký túc xá.
+
+- Trên website của Trường Đại học Thủy lợi có quyết định điều chỉnh mức thu phí nhà ở ký túc xá.
+- Dữ liệu hiện tại xác nhận rằng có quyết định điều chỉnh mức thu phí nhà ở ký túc xá trên website của Trường Đại học Thủy lợi.
+- Dữ liệu hiện tại chưa xác nhận được mức giá cụ thể của phí ở ký túc xá vì kết quả tìm kiếm tổng quan không hiển thị ngay con số chi tiết.
+- Khi hệ thống trả lời câu hỏi về giá ở ký túc xá của Trường Đại học Thủy lợi, hệ thống không nên khẳng định mức giá cụ thể nếu chưa truy xuất được văn bản gốc nêu rõ con số.
+
+- Dữ liệu về ký túc xá của Trường Đại học Thủy lợi nên được chia thành các nhóm thông tin gồm đơn vị quản lý, thông tin liên hệ, cơ sở vật chất, điều kiện sinh hoạt, khả năng tiếp nhận sinh viên, đối tượng ưu tiên, chính sách hỗ trợ và mức độ đầy đủ của dữ liệu giá ở.
+- Đối với các thông tin có mốc thời gian khác nhau, dữ liệu nên giữ nguyên mốc thời gian gắn với từng thông tin để tránh việc hệ thống hiểu sai rằng tất cả các con số đều áp dụng cho cùng một thời điểm.
+- Đối với thông tin về số lượng phòng, số chỗ ở và khả năng tiếp nhận sinh viên, hệ thống nên ghi rõ nguồn hoặc năm của từng con số để tránh trộn lẫn dữ liệu giữa các giai đoạn khác nhau.
