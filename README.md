@@ -1,10 +1,10 @@
-# 🎓 StudyBot — Chatbot Hỗ Trợ Sinh Viên
+#  StudyBot — Chatbot Hỗ Trợ Sinh Viên
 
 Chatbot AI thông minh sử dụng Google Gemini, Next.js và FastAPI.
 
 ---
 
-## 📁 Cấu trúc thư mục
+##  Cấu trúc thư mục
 
 ```
 chatbot-student/
@@ -36,7 +36,7 @@ chatbot-student/
 
 ---
 
-## 🚀 Hướng dẫn cài đặt
+##  Hướng dẫn cài đặt
 
 ### Bước 1: Lấy Gemini API Key
 
@@ -82,7 +82,6 @@ python main.py
 ```
 
 ✅ Backend chạy tại: `http://localhost:8000`
-📖 API Docs (Swagger): `http://localhost:8000/docs`
 
 ---
 
@@ -105,7 +104,7 @@ npm install
 npm run dev
 ```
 
-✅ Frontend chạy tại: `http://localhost:3000`
+ Frontend chạy tại: `http://localhost:3000`
 
 ---
 
@@ -125,24 +124,24 @@ cd frontend && npm run dev
 Tạo file `start.sh` ở thư mục gốc:
 ```bash
 #!/bin/bash
-echo "🚀 Khởi động StudyBot..."
+echo " Khởi động StudyBot..."
 
 # Khởi động Backend
 cd backend
 source venv/bin/activate
 uvicorn main:app --reload --port 8000 &
 BACKEND_PID=$!
-echo "✅ Backend PID: $BACKEND_PID"
+echo " Backend PID: $BACKEND_PID"
 
 # Khởi động Frontend
 cd ../frontend
 npm run dev &
 FRONTEND_PID=$!
-echo "✅ Frontend PID: $FRONTEND_PID"
+echo " Frontend PID: $FRONTEND_PID"
 
 echo ""
-echo "📌 Backend:  http://localhost:8000"
-echo "📌 Frontend: http://localhost:3000"
+echo " Backend:  http://localhost:8000"
+echo " Frontend: http://localhost:3000"
 echo ""
 echo "Nhấn Ctrl+C để dừng tất cả..."
 
@@ -203,7 +202,7 @@ Voice Input sử dụng **Web Speech API** — API tích hợp sẵn của trìn
 
 ---
 
-## 🖼️ Về tính năng Hình ảnh minh họa
+##  Về tính năng Hình ảnh minh họa
 
 Gemini được cấu hình trong System Instruction để tự động chèn ảnh Unsplash khi giải thích khái niệm phức tạp.
 
@@ -228,7 +227,7 @@ Frontend dùng `react-markdown` + custom `img` component để render có fallba
 
 ---
 
-## 🔮 Mở rộng thêm
+##  Mở rộng thêm
 
 - **Streaming response**: Thêm `stream=True` trong Gemini call + Server-Sent Events ở FastAPI
 - **Lưu lịch sử**: Tích hợp SQLite/PostgreSQL để lưu conversation history
