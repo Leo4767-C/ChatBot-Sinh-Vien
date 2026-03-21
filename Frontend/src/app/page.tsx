@@ -13,9 +13,9 @@ import clsx from "clsx";
 const SUGGESTIONS = [
   "Học phí trường là bao nhiêu?",
   "Điều kiện tốt nghiệp gồm những gì?",
-  "Giải thích Machine Learning kèm hình ảnh minh họa",
-  "Cách đăng ký tín chỉ học kỳ mới",
-  "Quy định điểm rèn luyện sinh viên",
+  "Điểm chuẩn của trường là bao nhiêu ?",
+  "Quy chế về điểm rèn luyện là như thế nào ?",
+  "Quy định về học bổng trường là gì ?",
 ];
 
 export default function App() {
@@ -117,7 +117,7 @@ export default function App() {
             <Sparkles className="w-3.5 h-3.5 text-accent" />
           </div>
           <div>
-            <p className="text-sm font-bold text-text-primary">NCKH StudyBot</p>
+            <p className="text-sm font-bold text-text-primary">ChatBot</p>
             <p className="text-xs text-text-muted">RAG · Voice · Hình ảnh</p>
           </div>
         </div>
@@ -177,13 +177,7 @@ export default function App() {
           )}
         </div>
 
-        <div className="p-3 border-t border-surface-3">
-          <p className="text-xs text-text-muted leading-relaxed">
-            💡 Chạy{" "}
-            <code className="bg-surface-3 px-1 rounded text-accent">python ingest.py</code>{" "}
-            để thêm tài liệu
-          </p>
-        </div>
+        
       </aside>
 
       {/* Main */}

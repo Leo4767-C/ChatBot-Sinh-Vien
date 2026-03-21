@@ -1,14 +1,16 @@
 """
-ingest.py — Phase 1 Ingest với hỗ trợ đầy đủ:
-  ✓ Text chunking (existing pipeline)
-  ✓ Hình ảnh từ PDF/DOCX (Gemini Vision mô tả)
-  ✓ Bảng từ PDF/DOCX (crop/render → PNG → Gemini Vision mô tả)
+ingest.py — Ingest:
+  ✓ Text chunks
+  ✓ Ảnh/bảng trong text chunk
+  ✓ Bảng riêng thành chunk riêng
+  ✓ Copy ảnh vào static /images
+  ✓ Upsert vào Qdrant với image_urls / image_descs
 """
 import argparse
 import logging
+import shutil
 import sys
 import uuid
-import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -18,12 +20,12 @@ sys.path.insert(0, str(ROOT))
 from dotenv import load_dotenv
 load_dotenv()
 
+from app.core.config import settings
 from app.rag.doc_preprocessor import run as preprocess_doc
 from app.rag.embedder import get_embeddings
-from app.rag.qdrant_client_custom import qdrant_client
 from app.rag.image_describer import describe_image
+from app.rag.qdrant_client_custom import qdrant_client
 from app.rag.table_extractor import extract_all_tables
-from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger(__name__)
@@ -35,26 +37,26 @@ IMG_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _copy_to_static(src_path: str) -> str | None:
-    """Copy ảnh/bảng vào thư mục static, trả về URL path."""
     src = Path(src_path)
     if not src.exists():
         return None
-    dest = IMG_DIR / src.name
-    if not dest.exists():
-        shutil.copy2(src, dest)
-    return f"/images/{src.name}"
+
+    ext = src.suffix.lower() or ".png"
+    safe_name = f"{src.stem}_{uuid.uuid4().hex[:8]}{ext}"
+    dest = IMG_DIR / safe_name
+    shutil.copy2(src, dest)
+    return f"/images/{safe_name}"
 
 
 def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
-    log.info(f"\n{'=' * 55}")
-    log.info(f"📄 Đang xử lý: {file_path.name}")
-    log.info(f"{'=' * 55}")
+    log.info("\n%s", "=" * 55)
+    log.info("📄 Đang xử lý: %s", file_path.name)
+    log.info("%s", "=" * 55)
 
     if not doc_id:
         doc_id = str(uuid.uuid4())
 
-    # ── 1. Text chunks (pipeline cũ) ───────────────────────
-    log.info("  [1/3] Parse text + ảnh...")
+    log.info("  [1/3] Parse text + ảnh trong chunk...")
     try:
         text_chunks = preprocess_doc(
             model=settings.GEMINI_MODEL,
@@ -63,22 +65,20 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
             to_console=False,
         )
     except Exception as e:
-        log.error(f"  Lỗi parse: {e}")
+        log.exception("  Lỗi parse: %s", e)
         text_chunks = []
 
-    log.info(f"  → {len(text_chunks)} text chunks")
+    log.info("  → %s text chunks", len(text_chunks))
 
-    # ── 2. Extract bảng riêng biệt ──────────────────────────
-    log.info("  [2/3] Extract bảng...")
+    log.info("  [2/3] Extract bảng riêng...")
     tmp_dir = ROOT / "data" / "tmp_tables"
     table_items = extract_all_tables(file_path, tmp_dir)
-    log.info(f"  → {len(table_items)} bảng tìm thấy")
+    log.info("  → %s bảng tìm thấy", len(table_items))
 
-    # ── 3. Enrich text chunks với ảnh ──────────────────────
     log.info("  [3/3] Mô tả ảnh + embed...")
     enriched = []
 
-    # 3a. Text chunks + ảnh thường
+    # text chunks
     for chunk in text_chunks:
         image_urls = []
         image_descs = []
@@ -86,20 +86,25 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
         for img_path in chunk.get("image_paths", []):
             if not img_path:
                 continue
+
             url = _copy_to_static(img_path)
             if url:
                 image_urls.append(url)
 
-            desc = describe_image(img_path)
+            try:
+                desc = describe_image(img_path)
+            except Exception:
+                desc = None
+
             if desc:
                 image_descs.append(desc)
 
-        embed_text = chunk["text"]
+        embed_text = chunk.get("text", "") or ""
         if image_descs:
             embed_text += "\n\n" + "\n".join(f"[Hình ảnh: {d}]" for d in image_descs)
 
         enriched.append({
-            "text": chunk["text"],
+            "text": chunk.get("text", ""),
             "embed_text": embed_text,
             "pages": chunk.get("pages", []),
             "image_urls": image_urls,
@@ -107,33 +112,39 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
             "is_table": False,
         })
 
-    # 3b. Bảng → tạo chunk riêng mỗi bảng
+    # bảng riêng
     for tbl in table_items:
-        img_path = tbl["image_path"]
+        img_path = tbl.get("image_path")
+        if not img_path:
+            continue
+
         url = _copy_to_static(img_path)
 
-        desc = describe_image(img_path)
+        try:
+            desc = describe_image(img_path)
+        except Exception:
+            desc = None
+
         if not desc:
             desc = "Bảng dữ liệu"
 
-        embed_text = (
-            f"[Bảng dữ liệu]\n{tbl['table_text']}\n\n"
-            f"[Mô tả bảng: {desc}]"
-        )
+        table_text = (tbl.get("table_text") or "").strip()
+        page_value = tbl.get("page")
+        page_info = [page_value] if page_value else []
 
-        page_info = [tbl["page"]] if tbl.get("page") else []
+        embed_text = f"[Bảng dữ liệu]\n{table_text}\n\n[Mô tả bảng: {desc}]"
 
         enriched.append({
-            "text": f"[Bảng] {desc}\n\n{tbl['table_text']}",
+            "text": f"[Bảng] {desc}\n\n{table_text}",
             "embed_text": embed_text,
             "pages": page_info,
             "image_urls": [url] if url else [],
             "image_descs": [desc],
             "is_table": True,
         })
-        log.info(f"  🗃  Bảng chunk: {desc[:60]}...")
 
-    # Xóa tmp
+        log.info("  🗃  Bảng chunk: %s...", desc[:60])
+
     if tmp_dir.exists():
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
@@ -141,9 +152,8 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
         log.warning("  Không có chunk nào!")
         return 0
 
-    log.info(f"  → Tổng {len(enriched)} chunks (text + bảng), bắt đầu embed...")
+    log.info("  → Tổng %s chunks (text + bảng), bắt đầu embed...", len(enriched))
 
-    # ── 4. Embed + upsert Qdrant ────────────────────────────
     batch_size = 16
     total = 0
 
@@ -154,17 +164,16 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
         try:
             dense_vecs, sparse_vecs, _ = get_embeddings(texts)
         except Exception as e:
-            log.error(f"  Embed lỗi batch {i // batch_size + 1}: {e}")
+            log.exception("  Embed lỗi batch %s: %s", i // batch_size + 1, e)
             continue
 
         vectors = []
         for j, chunk in enumerate(batch):
             sparse = sparse_vecs[j] or {}
-
             dense_vec = dense_vecs[j]
+
             if hasattr(dense_vec, "tolist"):
                 dense_vec = dense_vec.tolist()
-
             dense_vec = [float(x) for x in dense_vec]
 
             vectors.append({
@@ -181,44 +190,45 @@ def ingest_file(file_path: Path, doc_id: str | None = None) -> int:
                     "doc_id": doc_id,
                     "doc_name": file_path.name,
                     "pages": chunk["pages"],
-                    "image_urls": chunk["image_urls"],
+                    "image_urls": [u for u in chunk["image_urls"] if u],
                     "image_descs": chunk["image_descs"],
                     "is_table": chunk["is_table"],
                     "created_at": datetime.utcnow().isoformat(),
                 },
             })
 
-        if qdrant_client.upsert_vectors(vectors):
-            total += len(batch)
-            log.info(f"  ✓ Batch {i // batch_size + 1}: {len(batch)} vectors")
+        success_count = qdrant_client.upsert_vectors(vectors)
+        if success_count:
+            total += success_count
+            log.info("  ✓ Batch %s: %s vectors", i // batch_size + 1, success_count)
         else:
-            log.error(f"  ✗ Batch {i // batch_size + 1} thất bại")
+            log.error("  ✗ Batch %s thất bại", i // batch_size + 1)
 
-    log.info(f"\n  ✅ {file_path.name}: {total} chunks vào Qdrant")
-    log.info(f"     ({len(text_chunks)} text + {len(table_items)} bảng)")
+    log.info("\n  ✅ %s: %s chunks vào Qdrant", file_path.name, total)
+    log.info("     (%s text + %s bảng)", len(text_chunks), len(table_items))
     return total
 
 
 def ingest_directory(directory: Path) -> None:
-    files = [f for f in directory.rglob("*") if f.suffix.lower() in SUPPORTED]
+    files = [f for f in directory.rglob("*") if f.is_file() and f.suffix.lower() in SUPPORTED]
     if not files:
-        log.warning(f"Không có file nào trong {directory}")
+        log.warning("Không có file nào trong %s", directory)
         return
 
-    log.info(f"Tìm thấy {len(files)} file")
+    log.info("Tìm thấy %s file", len(files))
     total = sum(ingest_file(f) for f in files)
-    log.info(f"\n{'=' * 55}")
-    log.info(f"✅ HOÀN TẤT: {len(files)} files, {total} chunks vào Qdrant")
-    log.info(f"{'=' * 55}\nChạy uvicorn main:app --reload và chat thôi!")
+    log.info("\n%s", "=" * 55)
+    log.info("✅ HOÀN TẤT: %s files, %s chunks vào Qdrant", len(files), total)
+    log.info("%s", "=" * 55)
+    log.info("Chạy uvicorn main:app --reload và chat thôi!")
 
 
 def clear_collection() -> None:
     try:
-        qdrant_client.client.delete_collection(settings.COLLECTION_NAME)
-        qdrant_client.create_collection(vector_size=settings.EMBEDDING_VECTOR_SIZE)
-        log.info("✓ Đã xóa và tạo lại collection rỗng")
+        qdrant_client.recreate_collection(vector_size=settings.EMBEDDING_VECTOR_SIZE)
+        log.info("✓ Đã xóa và tạo lại collection hybrid")
     except Exception as e:
-        log.error(f"Lỗi: {e}")
+        log.error("Lỗi: %s", e)
 
 
 if __name__ == "__main__":
@@ -228,15 +238,15 @@ if __name__ == "__main__":
     parser.add_argument("--clear", action="store_true", help="Xóa Qdrant rồi ingest lại")
     args = parser.parse_args()
 
-    qdrant_client.create_collection(vector_size=settings.EMBEDDING_VECTOR_SIZE)
-
     if args.clear:
-        clear_collection()
+        qdrant_client.recreate_collection(vector_size=settings.EMBEDDING_VECTOR_SIZE)
+    else:
+        qdrant_client.create_collection(vector_size=settings.EMBEDDING_VECTOR_SIZE)
 
     if args.file:
         path = Path(args.file)
         if not path.exists():
-            log.error(f"File không tồn tại: {path}")
+            log.error("File không tồn tại: %s", path)
             sys.exit(1)
         ingest_file(path)
     else:

@@ -1,80 +1,94 @@
-import logging
-
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
-
 from app.core.config import settings
+import logging
 
-logger = logging.getLogger(__name__)
-
-QDRANT_URL = settings.QDRANT_URL
-QDRANT_API_KEY = settings.QDRANT_API_KEY
-COLLECTION_NAME = settings.COLLECTION_NAME
+log = logging.getLogger(__name__)
 
 
 class QdrantClientCustom:
-    def __init__(self, url: str, api_key: str | None = None):
-        self.client = QdrantClient(url=url, api_key=api_key)
+    def __init__(self):
+        self.collection_name = settings.QDRANT_COLLECTION
+        self.client = QdrantClient(
+            url=settings.QDRANT_URL,
+            api_key=settings.QDRANT_API_KEY,
+            prefer_grpc=False,
+        )
 
-    def collection_exists(self) -> bool:
+    def recreate_collection(self, vector_size: int):
+        """
+        Xóa collection cũ và tạo lại đúng schema hybrid:
+        - dense: named dense vector
+        - sparse: named sparse vector
+        """
         try:
-            return self.client.collection_exists(collection_name=COLLECTION_NAME)
-        except Exception as e:
-            logger.error("Error checking collection existence: %s", e)
-            return False
+            self.client.delete_collection(collection_name=self.collection_name)
+            log.info("Đã xóa collection cũ: %s", self.collection_name)
+        except Exception:
+            pass
 
-    def create_collection(self, vector_size: int):
-        try:
-            if self.collection_exists():
-                logger.info("[Qdrant] Collection already exists: %s", COLLECTION_NAME)
-                return
-
-            self.client.create_collection(
-                collection_name=COLLECTION_NAME,
-                vectors_config=models.VectorParams(
+        self.client.create_collection(
+            collection_name=self.collection_name,
+            vectors_config={
+                "dense": models.VectorParams(
                     size=vector_size,
                     distance=models.Distance.COSINE,
-                ),
-            )
-            logger.info("[Qdrant] Created collection: %s", COLLECTION_NAME)
-        except Exception as e:
-            logger.error("Error creating collection: %s", e)
-
-    def upsert_vectors(self, points) -> int:
-        """
-        Upsert từng point để tránh lỗi payload quá lớn.
-        Trả về số point upsert thành công.
-        """
-        if not points:
-            return 0
-
-        success = 0
-
-        for i, point in enumerate(points, start=1):
-            try:
-                self.client.upsert(
-                    collection_name=COLLECTION_NAME,
-                    points=[point],
-                    wait=True,
                 )
-                logger.info("  → Upserted batch %s: 1 vectors", i)
-                success += 1
-            except Exception as e:
-                logger.error("  ✗ Upsert thất bại batch %s", i)
-                logger.exception(e)
+            },
+            sparse_vectors_config={
+                "sparse": models.SparseVectorParams()
+            },
+        )
+        log.info("Đã tạo lại collection hybrid: %s", self.collection_name)
 
-        return success
+    def create_collection(self, vector_size: int):
+        """
+        Tạo collection nếu chưa có.
+        Nếu collection đã tồn tại thì giữ nguyên.
+        """
+        collections = self.client.get_collections().collections
+        names = [c.name for c in collections]
+
+        if self.collection_name in names:
+            log.info("Collection đã tồn tại: %s", self.collection_name)
+            return
+
+        self.client.create_collection(
+            collection_name=self.collection_name,
+            vectors_config={
+                "dense": models.VectorParams(
+                    size=vector_size,
+                    distance=models.Distance.COSINE,
+                )
+            },
+            sparse_vectors_config={
+                "sparse": models.SparseVectorParams()
+            },
+        )
+        log.info("Đã tạo collection mới: %s", self.collection_name)
 
     def delete_collection(self):
+        self.client.delete_collection(collection_name=self.collection_name)
+        log.info("Đã xóa collection: %s", self.collection_name)
+
+    def upsert_vectors(self, vectors: list[dict]) -> int:
         try:
-            if self.collection_exists():
-                self.client.delete_collection(collection_name=COLLECTION_NAME)
-                logger.info("[Qdrant] Deleted collection: %s", COLLECTION_NAME)
-        except Exception as e:
-            logger.error("Error deleting collection: %s", e)
+            self.client.upsert(
+                collection_name=self.collection_name,
+                points=[
+                    models.PointStruct(
+                        id=v["id"],
+                        vector=v["vector"],
+                        payload=v["payload"],
+                    )
+                    for v in vectors
+                ],
+                wait=True,
+            )
+            return len(vectors)
+        except Exception:
+            log.exception("✗ Upsert thất bại")
+            return 0
 
 
-qdrant_client = QdrantClientCustom(
-    url=QDRANT_URL,
-    api_key=QDRANT_API_KEY,
-)
+qdrant_client = QdrantClientCustom()

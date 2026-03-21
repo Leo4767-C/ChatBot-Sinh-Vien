@@ -28,12 +28,11 @@ class Retriever:
         logger.info("Embedding query for retrieval...")
 
         try:
-            dense_, sparse_, colbert_ = embedder.get_embeddings([query])
+            dense_, sparse_, _ = embedder.get_embeddings([query])
         except Exception as e:
             logger.exception("Embedding failed: %s", e)
             return []
 
-        # ── Fix: dùng len() thay vì `not` để tránh lỗi numpy array ──
         if dense_ is None or len(dense_) == 0:
             logger.warning("Dense embedding empty")
             return []
@@ -44,22 +43,20 @@ class Retriever:
             return []
 
         sparse_query = sparse_[0] if (sparse_ is not None and len(sparse_) > 0) else None
-        late_query   = _to_list(colbert_[0]) if (colbert_ is not None and len(colbert_) > 0) else None
 
-        # bot_id=0 → tìm toàn bộ collection, không filter theo bot
         filter_obj = None
         if bot_id > 0:
             filter_obj = Filter(
                 must=[FieldCondition(key="bot_id", match=MatchValue(value=bot_id))]
             )
 
-        top_k            = getattr(settings, "TOP_K", 5)
-        score_threshold  = getattr(settings, "SCORE_THRESHOLD", None)
-        collection_name  = settings.COLLECTION_NAME
+        top_k = getattr(settings, "TOP_K", 5)
+        score_threshold = getattr(settings, "SCORE_THRESHOLD", None)
+        collection_name = getattr(settings, "QDRANT_COLLECTION", None) or getattr(settings, "COLLECTION_NAME")
 
         try:
             if self.async_client:
-                logger.info("Async hybrid retrieval (dense+sparse+ColBERT)")
+                logger.info("Async hybrid retrieval (dense+sparse)")
 
                 prefetch = [
                     models.Prefetch(
@@ -84,25 +81,6 @@ class Retriever:
                         )
                     )
 
-                if late_query:
-                    result = await self.async_client.query_points(
-                        collection_name=collection_name,
-                        prefetch=[
-                            models.Prefetch(
-                                prefetch=prefetch,
-                                query=models.FusionQuery(fusion=models.Fusion.RRF),
-                                limit=100,
-                            )
-                        ],
-                        query=late_query,
-                        using="late",
-                        with_payload=True,
-                        limit=top_k,
-                        query_filter=filter_obj,
-                    )
-                    return getattr(result, "points", [])
-
-                # late_query không có → chỉ dùng RRF fusion
                 result = await self.async_client.query_points(
                     collection_name=collection_name,
                     prefetch=prefetch,
@@ -113,7 +91,6 @@ class Retriever:
                 )
                 return getattr(result, "points", [])
 
-            # Fallback sync dense search
             logger.info("Sync dense retrieval (fallback)")
             sync_client = getattr(self.client, "client", self.client)
 

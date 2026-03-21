@@ -204,8 +204,8 @@ export default function ChatInput({ onSend, onSendImage, loading, hasDocs }: Pro
 
       <p className="text-xs text-center text-text-muted opacity-40">
         Enter gửi · Shift+Enter xuống dòng
-        {supported && " · 🎤 hỗ trợ giọng nói tiếng Việt"}
-        {" · 🖼️ hỗ trợ PNG/JPG/WEBP"}
+        {supported && " ·  Hỗ trợ giọng nói tiếng Việt"}
+        {" ·  Hỗ trợ PNG/JPG/WEBP"}
       </p>
     </div>
   );

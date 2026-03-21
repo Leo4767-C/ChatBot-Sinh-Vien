@@ -1,8 +1,14 @@
 """
 Chat router — RAG + Gemini streaming + hỗ trợ ảnh người dùng upload.
+- Không hiểu nhầm "tiếng Anh" thành "ảnh"
+- Chỉ hiện ảnh khi user có ý định xem trực quan
+- Lọc ảnh theo semantic similarity giữa câu hỏi và nội dung ảnh/chunk
 """
 import json
 import logging
+import math
+import re
+import unicodedata
 import uuid
 from io import BytesIO
 from pathlib import Path
@@ -18,7 +24,8 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.models.database import ChatMessage, Session, get_db
+from app.models.database import AsyncSessionLocal, ChatMessage, Session, get_db
+from app.rag.embedder import get_embeddings
 from app.rag.retriever import Retriever
 
 logger = logging.getLogger(__name__)
@@ -54,22 +61,6 @@ class ChatRequest(BaseModel):
     question: str
 
 
-def _collect_data_images(chunks: list, limit: int = 2) -> list[str]:
-    urls = []
-    seen = set()
-
-    for c in chunks:
-        payload = c.payload or {}
-        for url in payload.get("image_urls", []) or []:
-            if url and url not in seen:
-                seen.add(url)
-                urls.append(url)
-            if len(urls) >= limit:
-                return urls
-
-    return urls
-
-
 def _pack_meta(
     *,
     sources: list[str] | None = None,
@@ -96,13 +87,63 @@ def _parse_meta(raw: str | None) -> dict:
         return {"sources": [s for s in raw.split("|") if s]}
 
 
-def _is_image_followup(question: str) -> bool:
-    q = question.lower()
-    keywords = [
-        "ảnh", "hình", "bức ảnh", "bức hình", "trong ảnh", "trong hình",
-        "ảnh này", "hình này", "tấm này", "picture", "image", "photo"
+def _normalize_text(text: str) -> str:
+    text = (text or "").lower().strip()
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _wants_visual(question: str) -> bool:
+    """
+    Chỉ nhận diện ý định muốn xem trực quan.
+    Không bắt keyword đơn lẻ 'anh' để tránh nhầm với 'tiếng Anh'.
+    """
+    q = _normalize_text(question)
+    phrases = [
+        "xem anh",
+        "xem hinh",
+        "cho xem anh",
+        "cho xem hinh",
+        "in ra bang",
+        "hien thi bang",
+        "xem bang",
+        "mo bang",
+        "hien thi anh",
+        "hien thi hinh",
+        "xem hinh minh hoa",
+        "in ra hinh",
+        "picture",
+        "image",
+        "photo",
     ]
-    return any(k in q for k in keywords)
+    return any(p in q for p in phrases)
+
+
+def _is_image_followup(question: str) -> bool:
+    """
+    Chỉ dùng cho luồng hỏi tiếp về ảnh đã upload.
+    Không dùng từ đơn 'anh'.
+    """
+    q = _normalize_text(question)
+    phrases = [
+        "xem anh",
+        "xem hinh",
+        "trong anh",
+        "trong hinh",
+        "anh nay",
+        "hinh nay",
+        "buc anh",
+        "buc hinh",
+        "tam anh",
+        "tam hinh",
+        "picture",
+        "image",
+        "photo",
+    ]
+    return any(p in q for p in phrases)
 
 
 def _is_text_focused_image_request(question: str) -> bool:
@@ -123,6 +164,87 @@ def _is_text_focused_image_request(question: str) -> bool:
         "bài viết", "bai viet",
     ]
     return any(k in q for k in keywords)
+
+
+def _to_list(x):
+    if x is None:
+        return None
+    if hasattr(x, "tolist"):
+        return x.tolist()
+    return x
+
+
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
+    if na == 0 or nb == 0:
+        return 0.0
+    return dot / (na * nb)
+
+
+async def _collect_relevant_images_semantic(question: str, chunks: list, limit: int = 2) -> list[str]:
+    """
+    Chỉ lấy ảnh nếu:
+    1) user có ý định xem trực quan
+    2) ảnh/chunk đủ liên quan ngữ nghĩa với câu hỏi
+    """
+    if not _wants_visual(question):
+        return []
+
+    try:
+        q_dense, _, _ = get_embeddings([question])
+        if q_dense is None or len(q_dense) == 0:
+            return []
+        q_vec = _to_list(q_dense[0])
+        if not q_vec:
+            return []
+    except Exception as e:
+        logger.warning("Image semantic filter embedding failed: %s", e)
+        return []
+
+    candidates: list[tuple[float, str]] = []
+    seen = set()
+
+    for c in chunks:
+        payload = c.payload or {}
+        image_urls = payload.get("image_urls", []) or []
+        if not image_urls:
+            continue
+
+        rep_text_parts = []
+        rep_text_parts.extend(payload.get("image_descs", []) or [])
+        rep_text_parts.append(payload.get("content", "") or "")
+        rep_text_parts.append(payload.get("doc_name", "") or "")
+        rep_text = "\n".join([x for x in rep_text_parts if x]).strip()
+
+        if not rep_text:
+            continue
+
+        try:
+            d_dense, _, _ = get_embeddings([rep_text])
+            if d_dense is None or len(d_dense) == 0:
+                continue
+            d_vec = _to_list(d_dense[0])
+            score = _cosine_similarity(q_vec, d_vec)
+        except Exception as e:
+            logger.warning("Image candidate embedding failed: %s", e)
+            score = 0.0
+
+        for url in image_urls:
+            if url and url not in seen:
+                seen.add(url)
+                candidates.append((score, url))
+
+    candidates.sort(key=lambda x: x[0], reverse=True)
+
+    threshold = 0.45
+    selected = [url for score, url in candidates if score >= threshold][:limit]
+
+    logger.info("Selected %s relevant images for question='%s'", len(selected), question)
+    return selected
 
 
 def _build_upload_image_prompt(user_prompt: str) -> str:
@@ -202,11 +324,7 @@ def _open_local_image_from_url(image_url: str) -> Image.Image:
     return Image.open(path).convert("RGB")
 
 
-async def _vision_answer_for_uploaded_image(
-    *,
-    question: str,
-    image_url: str,
-) -> str:
+async def _vision_answer_for_uploaded_image(*, question: str, image_url: str) -> str:
     img = _open_local_image_from_url(image_url)
 
     model = genai.GenerativeModel(
@@ -219,7 +337,6 @@ async def _vision_answer_for_uploaded_image(
     )
 
     prompt = _build_followup_image_prompt(question)
-
     res = await model.generate_content_async([prompt, img])
     text = getattr(res, "text", "") or "Mình chưa phân tích được ảnh này."
     return text.strip()
@@ -230,130 +347,145 @@ async def _stream_text_answer(
     session_id: str,
     question: str,
     history: list[dict],
-    db: AsyncSession,
 ) -> AsyncGenerator[str, None]:
-    try:
-        chunks = await _retriever.retrieve_v3(question, bot_id=0)
-        if not isinstance(chunks, list):
-            chunks = list(chunks)
-    except Exception as e:
-        logger.error(f"Qdrant error: {e}")
-        chunks = []
+    async with AsyncSessionLocal() as db:
+        try:
+            try:
+                chunks = await _retriever.retrieve_v3(question, bot_id=0)
+                if not isinstance(chunks, list):
+                    chunks = list(chunks)
+            except Exception as e:
+                logger.error("Qdrant error: %s", e)
+                chunks = []
 
-    source_names = list({c.payload.get("doc_name", "") for c in chunks if c.payload})
+            source_names = list({
+                c.payload.get("doc_name", "")
+                for c in chunks
+                if c.payload and c.payload.get("doc_name")
+            })
 
-    ctx_parts = []
-    for i, c in enumerate(chunks, 1):
-        payload = c.payload or {}
-        content = payload.get("content", "")
-        doc_name = payload.get("doc_name", "")
-        updated = payload.get("created_at", "")
-        image_urls = payload.get("image_urls", [])
-        img_descs = payload.get("image_descs", [])
+            ctx_parts = []
+            for i, c in enumerate(chunks, 1):
+                payload = c.payload or {}
+                content = payload.get("content", "")
+                doc_name = payload.get("doc_name", "")
+                updated = payload.get("created_at", "")
+                image_urls = payload.get("image_urls", []) or []
+                img_descs = payload.get("image_descs", []) or []
 
-        ctx_text = f"[CONTEXT {i}] Nguồn: {doc_name} | Cập nhật: {updated}\n{content}"
+                ctx_text = f"[CONTEXT {i}] Nguồn: {doc_name} | Cập nhật: {updated}\n{content}"
 
-        if image_urls:
-            img_lines = []
-            for idx, url in enumerate(image_urls):
-                desc = img_descs[idx] if idx < len(img_descs) else ""
-                img_lines.append(f"[HÌNH ẢNH: {url}] {desc}")
-            ctx_text += "\n" + "\n".join(img_lines)
+                if image_urls:
+                    img_lines = []
+                    for idx, url in enumerate(image_urls):
+                        desc = img_descs[idx] if idx < len(img_descs) else ""
+                        img_lines.append(f"[HÌNH ẢNH: {url}] {desc}".strip())
+                    ctx_text += "\n" + "\n".join(img_lines)
 
-        ctx_parts.append(ctx_text)
+                ctx_parts.append(ctx_text)
 
-    if ctx_parts:
-        src_str = ", ".join(f"**{n}**" for n in source_names if n)
-        prompt = f"Tài liệu tham khảo: {src_str}\n\n{'---'.join(ctx_parts)}\n\nCâu hỏi: {question}"
-    else:
-        prompt = question
+            if ctx_parts:
+                src_str = ", ".join(f"**{n}**" for n in source_names if n)
+                prompt = (
+                    f"Tài liệu tham khảo: {src_str}\n\n"
+                    f"{'---'.join(ctx_parts)}\n\n"
+                    f"Câu hỏi: {question}"
+                )
+            else:
+                prompt = question
 
-    db.add(ChatMessage(session_id=session_id, role="user", content=question))
-    await db.commit()
+            db.add(ChatMessage(session_id=session_id, role="user", content=question))
+            await db.commit()
 
-    if source_names:
-        yield f"data: [SOURCES]{json.dumps(source_names, ensure_ascii=False)}\n\n"
+            if source_names:
+                yield f"data: [SOURCES]{json.dumps(source_names, ensure_ascii=False)}\n\n"
 
-    selected_images = _collect_data_images(chunks, limit=2)
-    if selected_images:
-        yield f"data: [IMAGES]{json.dumps(selected_images, ensure_ascii=False)}\n\n"
+            selected_images = await _collect_relevant_images_semantic(question, chunks, limit=2)
+            if selected_images:
+                yield f"data: [IMAGES]{json.dumps(selected_images, ensure_ascii=False)}\n\n"
 
-    model = genai.GenerativeModel(
-        model_name=settings.GEMINI_MODEL,
-        system_instruction=SYSTEM_INSTRUCTION,
-        generation_config=genai.GenerationConfig(
-            temperature=settings.TEMPERATURE,
-            max_output_tokens=settings.MAX_OUTPUT_TOKENS,
-        ),
-    )
+            model = genai.GenerativeModel(
+                model_name=settings.GEMINI_MODEL,
+                system_instruction=SYSTEM_INSTRUCTION,
+                generation_config=genai.GenerationConfig(
+                    temperature=settings.TEMPERATURE,
+                    max_output_tokens=settings.MAX_OUTPUT_TOKENS,
+                ),
+            )
 
-    chat_s = model.start_chat(
-        history=[
-            {"role": m["role"], "parts": [{"text": m["content"]}]}
-            for m in history[-20:]
-        ]
-    )
+            chat_s = model.start_chat(
+                history=[
+                    {"role": m["role"], "parts": [{"text": m["content"]}]}
+                    for m in history[-20:]
+                ]
+            )
 
-    full = ""
-    try:
-        stream = await chat_s.send_message_async(prompt, stream=True)
-        async for chunk in stream:
-            if chunk.text:
-                full += chunk.text
-                yield f"data: {chunk.text.replace(chr(10), chr(92) + 'n')}\n\n"
-    except Exception as e:
-        err = str(e)
-        msg = "Hệ thống quá tải, thử lại sau." if "429" in err or "quota" in err.lower() else f"Lỗi: {err[:120]}"
-        yield f"data: {msg}\n\n"
-        full = msg
+            full = ""
+            try:
+                stream = await chat_s.send_message_async(prompt, stream=True)
+                async for chunk in stream:
+                    delta = getattr(chunk, "text", "") or ""
+                    if delta:
+                        full += delta
+                        yield f"data: {delta.replace(chr(10), chr(92) + 'n')}\n\n"
+            except Exception as e:
+                err = str(e)
+                msg = "Hệ thống quá tải, thử lại sau." if "429" in err or "quota" in err.lower() else f"Lỗi: {err[:120]}"
+                yield f"data: {msg}\n\n"
+                full = msg
 
-    db.add(ChatMessage(
-        session_id=session_id,
-        role="model",
-        content=full,
-        source_docs=_pack_meta(sources=source_names, images=selected_images, kind="rag"),
-    ))
-    await db.commit()
-    await _maybe_set_title(db, session_id, question)
+            db.add(ChatMessage(
+                session_id=session_id,
+                role="model",
+                content=full,
+                source_docs=_pack_meta(sources=source_names, images=selected_images, kind="rag"),
+            ))
+            await db.commit()
+            await _maybe_set_title(db, session_id, question)
 
-    yield "data: [DONE]\n\n"
+            yield "data: [DONE]\n\n"
+        finally:
+            await db.close()
 
 
 async def _stream_followup_about_last_image(
     *,
     session_id: str,
     question: str,
-    db: AsyncSession,
 ) -> AsyncGenerator[str, None]:
-    image_url = await _find_last_uploaded_image(session_id, db)
-    if not image_url:
-        yield "data: Mình chưa thấy ảnh nào được gửi trong phiên chat này.\n\n"
-        yield "data: [DONE]\n\n"
-        return
+    async with AsyncSessionLocal() as db:
+        try:
+            image_url = await _find_last_uploaded_image(session_id, db)
+            if not image_url:
+                yield "data: Mình chưa thấy ảnh nào được gửi trong phiên chat này.\n\n"
+                yield "data: [DONE]\n\n"
+                return
 
-    db.add(ChatMessage(session_id=session_id, role="user", content=question))
-    await db.commit()
+            db.add(ChatMessage(session_id=session_id, role="user", content=question))
+            await db.commit()
 
-    yield f"data: [IMAGES]{json.dumps([image_url], ensure_ascii=False)}\n\n"
+            yield f"data: [IMAGES]{json.dumps([image_url], ensure_ascii=False)}\n\n"
 
-    try:
-        full = await _vision_answer_for_uploaded_image(question=question, image_url=image_url)
-    except Exception as e:
-        logger.exception("Vision follow-up error: %s", e)
-        full = "Mình chưa phân tích tiếp được ảnh này. Hãy thử lại."
+            try:
+                full = await _vision_answer_for_uploaded_image(question=question, image_url=image_url)
+            except Exception as e:
+                logger.exception("Vision follow-up error: %s", e)
+                full = "Mình chưa phân tích tiếp được ảnh này. Hãy thử lại."
 
-    yield f"data: {full.replace(chr(10), chr(92) + 'n')}\n\n"
+            yield f"data: {full.replace(chr(10), chr(92) + 'n')}\n\n"
 
-    db.add(ChatMessage(
-        session_id=session_id,
-        role="model",
-        content=full,
-        source_docs=_pack_meta(images=[image_url], kind="vision_followup"),
-    ))
-    await db.commit()
-    await _maybe_set_title(db, session_id, question)
+            db.add(ChatMessage(
+                session_id=session_id,
+                role="model",
+                content=full,
+                source_docs=_pack_meta(images=[image_url], kind="vision_followup"),
+            ))
+            await db.commit()
+            await _maybe_set_title(db, session_id, question)
 
-    yield "data: [DONE]\n\n"
+            yield "data: [DONE]\n\n"
+        finally:
+            await db.close()
 
 
 @router.post("/stream")
@@ -368,18 +500,18 @@ async def chat_stream(req: ChatRequest, db: AsyncSession = Depends(get_db)):
     )
     history = [{"role": m.role, "content": m.content} for m in res.scalars().all()]
 
+    await db.close()
+
     if _is_image_followup(req.question):
         stream = _stream_followup_about_last_image(
             session_id=req.session_id,
             question=req.question,
-            db=db,
         )
     else:
         stream = _stream_text_answer(
             session_id=req.session_id,
             question=req.question,
             history=history,
-            db=db,
         )
 
     return StreamingResponse(
@@ -437,7 +569,6 @@ async def analyze_uploaded_image(
         )
 
         prompt = _build_upload_image_prompt(user_prompt)
-
         res = await model.generate_content_async([prompt, pil_img])
         answer = (getattr(res, "text", "") or "").strip() or "Mình chưa phân tích được ảnh này."
     except Exception as e:
