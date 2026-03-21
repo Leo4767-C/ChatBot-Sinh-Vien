@@ -1,24 +1,61 @@
 const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export interface ChatSession { id:string; title:string; created_at:string; updated_at:string; }
+export interface ChatSession {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ImageChatResponse {
+  ok: boolean;
+  answer: string;
+  image_url: string;
+}
 
 export async function createSession(): Promise<ChatSession> {
-  const r = await fetch(`${BASE}/api/sessions/`, {method:"POST"});
+  const r = await fetch(`${BASE}/api/sessions/`, { method: "POST" });
   if (!r.ok) throw new Error("Không tạo được session");
   return r.json();
 }
+
 export async function getSessions(): Promise<ChatSession[]> {
   const r = await fetch(`${BASE}/api/sessions/`);
   if (!r.ok) return [];
   return r.json();
 }
+
 export async function getHistory(sid: string) {
   const r = await fetch(`${BASE}/api/sessions/${sid}/history`);
   if (!r.ok) return [];
   return r.json();
 }
+
 export async function deleteSession(sid: string) {
-  await fetch(`${BASE}/api/sessions/${sid}`, {method:"DELETE"});
+  await fetch(`${BASE}/api/sessions/${sid}`, { method: "DELETE" });
+}
+
+export async function uploadImage(
+  sessionId: string,
+  file: File,
+  question?: string
+): Promise<ImageChatResponse> {
+  const form = new FormData();
+  form.append("session_id", sessionId);
+  form.append("image", file);
+  if (question?.trim()) form.append("question", question.trim());
+
+  const r = await fetch(`${BASE}/api/chat/image`, {
+    method: "POST",
+    body: form,
+  });
+
+  if (!r.ok) {
+    const text = await r.text().catch(() => "");
+    throw new Error(text || "Không gửi được ảnh lên backend");
+  }
+
+  return r.json();
 }
 
 export async function streamChat(
@@ -28,7 +65,7 @@ export async function streamChat(
   onSources: (s: string[]) => void,
   onDone: () => void,
   onError: (e: string) => void,
-  onImages?: (urls: string[]) => void,   // ← callback mới cho [IMAGES]
+  onImages?: (urls: string[]) => void,
 ) {
   let r: Response;
   try {
@@ -41,32 +78,43 @@ export async function streamChat(
     onError("Không kết nối được backend. Kiểm tra FastAPI port 8000.");
     return;
   }
-  if (!r.ok) { onError(`Lỗi server ${r.status}`); return; }
 
-  const reader = r.body!.getReader();
-  const dec = new TextDecoder();
-  let buf = "";
+  if (!r.ok || !r.body) {
+    onError(`Lỗi server ${r.status}`);
+    return;
+  }
+
+  const reader = r.body.getReader();
+  const dec = new TextDecoder("utf-8");
+  let buffer = "";
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split("\n");
-    buf = lines.pop() || "";
 
-    for (const line of lines) {
+    buffer += dec.decode(value, { stream: true });
+
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() || "";
+
+    for (const chunk of chunks) {
+      const line = chunk.trim();
       if (!line.startsWith("data: ")) continue;
+
       const data = line.slice(6);
 
-      if (data === "[DONE]") { onDone(); return; }
+      if (data === "[DONE]") {
+        onDone();
+        return;
+      }
 
-      // Parse [SOURCES]
       if (data.startsWith("[SOURCES]")) {
-        try { onSources(JSON.parse(data.slice(9))); } catch {}
+        try {
+          onSources(JSON.parse(data.slice(9)));
+        } catch {}
         continue;
       }
 
-      // Parse [IMAGES] — không để lọt ra thành text
       if (data.startsWith("[IMAGES]")) {
         try {
           const urls: string[] = JSON.parse(data.slice(8));
@@ -75,9 +123,9 @@ export async function streamChat(
         continue;
       }
 
-      // Text chunk bình thường
       onChunk(data.replace(/\\n/g, "\n"));
     }
   }
+
   onDone();
 }

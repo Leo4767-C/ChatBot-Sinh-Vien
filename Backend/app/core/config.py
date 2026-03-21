@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     QDRANT_API_KEY: str | None = None
     QDRANT_COLLECTION: str = "nckh_docs"
     COLLECTION_NAME: str = "nckh_docs"
-
+    UNSPLASH_ACCESS_KEY: str | None = None
     EMBEDDING_VECTOR_SIZE: int = 1024
 
     CHUNK_SIZE: int = 800

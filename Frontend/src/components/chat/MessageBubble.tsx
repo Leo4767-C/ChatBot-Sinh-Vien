@@ -1,54 +1,122 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Message } from "@/lib/types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SHL } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
+
+const API_BASE = "http://127.0.0.1:8000";
 
 export default function MessageBubble({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
+  const sources = msg.sources ?? [];
+
+  const imageUrls = useMemo(() => {
+    if (!msg.images || msg.images.length === 0) return [];
+
+    return msg.images
+      .map((url) => {
+        if (!url) return "";
+        if (url.startsWith("blob:")) return url;
+        if (url.startsWith("http://") || url.startsWith("https://")) return url;
+        if (url.startsWith("/")) return `${API_BASE}${url}`;
+        return `${API_BASE}/${url}`;
+      })
+      .filter(Boolean);
+  }, [msg.images]);
+
   return (
-    <div className={clsx("flex gap-3 animate-fade-up", isUser ? "flex-row-reverse" : "flex-row")}>
-      <div className={clsx(
-        "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
-        isUser ? "bg-accent text-surface-DEFAULT" : "bg-surface-2 border border-surface-3 text-base"
-      )}>
+    <div
+      className={clsx(
+        "flex gap-3 animate-fade-up",
+        isUser ? "flex-row-reverse" : "flex-row"
+      )}
+    >
+      <div
+        className={clsx(
+          "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+          isUser
+            ? "bg-accent text-surface-DEFAULT"
+            : "bg-surface-2 border border-surface-3 text-base"
+        )}
+      >
         {isUser ? "SV" : "🤖"}
       </div>
 
       <div className="max-w-[82%] space-y-1.5">
-        <div className={clsx(
-          "rounded-2xl px-4 py-3 text-sm",
-          isUser
-            ? "bg-accent/10 border border-accent/20 text-text-primary rounded-tr-sm"
-            : "bg-surface-1 border border-surface-3 text-text-primary rounded-tl-sm"
-        )}>
-          {isUser
-            ? <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
-            : (
-              <div>
-                <MD content={msg.content} />
-                {msg.isStreaming && (
-                  <span className="inline-block w-2 h-4 bg-accent animate-pulse ml-0.5 rounded-sm align-text-bottom" />
-                )}
-              </div>
-            )
-          }
+        <div
+          className={clsx(
+            "rounded-2xl px-4 py-3 text-sm",
+            isUser
+              ? "bg-accent/10 border border-accent/20 text-text-primary rounded-tr-sm"
+              : "bg-surface-1 border border-surface-3 text-text-primary rounded-tl-sm"
+          )}
+        >
+          {isUser ? (
+            <div>
+              {msg.content?.trim() && (
+                <p className="leading-relaxed whitespace-pre-wrap break-words">
+                  {msg.content}
+                </p>
+              )}
+
+              {imageUrls.length > 0 && (
+                <div className="mt-3 space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                    <ImageIcon className="w-3.5 h-3.5 text-accent" />
+                    <span>Ảnh bạn đã gửi</span>
+                  </div>
+                  <div className="grid gap-3">
+                    {imageUrls.map((url, idx) => (
+                      <Img key={`${url}-${idx}`} src={url} alt={`Ảnh đã gửi ${idx + 1}`} userImage />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <MD content={msg.content} />
+
+              {imageUrls.length > 0 && (
+                <div className="mt-4 space-y-3">
+                  <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                    <ImageIcon className="w-3.5 h-3.5 text-accent" />
+                    <span>Hình ảnh liên quan</span>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {imageUrls.map((url, idx) => (
+                      <Img
+                        key={`${url}-${idx}`}
+                        src={url}
+                        alt={`Hình minh họa ${idx + 1}`}
+                        userImage={false}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {msg.isStreaming && (
+                <span className="inline-block w-2 h-4 bg-accent animate-pulse ml-0.5 rounded-sm align-text-bottom" />
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Citation sources */}
-        {msg.sources && msg.sources.length > 0 && (
+        {!isUser && sources.length > 0 && (
           <div className="flex items-start gap-1.5 px-2">
             <BookOpen className="w-3 h-3 text-accent flex-shrink-0 mt-0.5" />
             <p className="text-xs text-text-muted">
               <span className="text-accent font-medium">Nguồn: </span>
-              {msg.sources.map((s, i) => (
+              {sources.map((s, i) => (
                 <span key={i}>
                   <span className="italic text-text-secondary">{s}</span>
-                  {i < msg.sources!.length - 1 && ", "}
+                  {i < sources.length - 1 && ", "}
                 </span>
               ))}
             </p>
@@ -59,14 +127,11 @@ export default function MessageBubble({ msg }: { msg: Message }) {
   );
 }
 
-// ── Markdown renderer ─────────────────────────────────────────
 function MD({ content }: { content: string }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        // Code block với syntax highlighting
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         code({ inline, className, children, ...props }: any) {
           const match = /language-(\w+)/.exec(className || "");
           const lang = match?.[1] || "";
@@ -83,7 +148,12 @@ function MD({ content }: { content: string }) {
                   style={oneDark}
                   language={lang}
                   PreTag="div"
-                  customStyle={{ margin: 0, background: "#0d1117", fontSize: "0.82rem", lineHeight: "1.6" }}
+                  customStyle={{
+                    margin: 0,
+                    background: "#0d1117",
+                    fontSize: "0.82rem",
+                    lineHeight: "1.6",
+                  }}
                   {...props}
                 >
                   {code}
@@ -91,6 +161,7 @@ function MD({ content }: { content: string }) {
               </div>
             );
           }
+
           return (
             <code className="px-1.5 py-0.5 rounded bg-surface-3 text-accent text-xs font-mono">
               {children}
@@ -98,13 +169,10 @@ function MD({ content }: { content: string }) {
           );
         },
 
-        // Hình ảnh — dùng thẳng <img> không qua Next.js Image
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         img({ src, alt }: any) {
-          return <Img src={src || ""} alt={alt || "Hình minh họa"} />;
+          return <Img src={src || ""} alt={alt || "Hình minh họa"} userImage={false} />;
         },
 
-        // Bảng
         table: ({ children }) => (
           <div className="overflow-x-auto rounded-xl border border-surface-3 my-3">
             <table className="w-full text-xs">{children}</table>
@@ -114,41 +182,61 @@ function MD({ content }: { content: string }) {
           <thead className="bg-surface-3 text-text-secondary">{children}</thead>
         ),
         th: ({ children }) => (
-          <th className="px-3 py-2 text-left font-medium uppercase tracking-wide text-xs">{children}</th>
+          <th className="px-3 py-2 text-left font-medium uppercase tracking-wide text-xs">
+            {children}
+          </th>
         ),
         td: ({ children }) => (
-          <td className="px-3 py-2 border-t border-surface-3 text-text-primary">{children}</td>
+          <td className="px-3 py-2 border-t border-surface-3 text-text-primary">
+            {children}
+          </td>
         ),
-
-        // Headings
-        h1: ({ children }) => <h1 className="text-xl font-bold text-text-primary mt-5 mb-2">{children}</h1>,
-        h2: ({ children }) => <h2 className="text-lg font-bold text-accent mt-4 mb-2 border-b border-surface-3 pb-1">{children}</h2>,
-        h3: ({ children }) => <h3 className="text-base font-semibold text-text-primary mt-3 mb-1">{children}</h3>,
-
-        // Lists
-        ul: ({ children }) => <ul className="list-disc list-inside space-y-1 my-2 text-text-primary">{children}</ul>,
-        ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 my-2 text-text-primary">{children}</ol>,
+        h1: ({ children }) => (
+          <h1 className="text-xl font-bold text-text-primary mt-5 mb-2">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-lg font-bold text-accent mt-4 mb-2 border-b border-surface-3 pb-1">
+            {children}
+          </h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-base font-semibold text-text-primary mt-3 mb-1">
+            {children}
+          </h3>
+        ),
+        ul: ({ children }) => (
+          <ul className="list-disc list-inside space-y-1 my-2 text-text-primary">
+            {children}
+          </ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="list-decimal list-inside space-y-1 my-2 text-text-primary">
+            {children}
+          </ol>
+        ),
         li: ({ children }) => <li className="ml-2">{children}</li>,
-
-        // Blockquote
         blockquote: ({ children }) => (
           <blockquote className="border-l-4 border-accent pl-4 py-1 my-3 italic text-text-secondary bg-surface-2 rounded-r-lg">
             {children}
           </blockquote>
         ),
-
-        // Paragraph
-        p: ({ children }) => <p className="my-1.5 leading-relaxed text-text-primary">{children}</p>,
-
-        // Inline styles
-        strong: ({ children }) => <strong className="font-bold text-accent">{children}</strong>,
-        em: ({ children }) => <em className="italic text-text-secondary">{children}</em>,
+        p: ({ children }) => (
+          <p className="my-1.5 leading-relaxed text-text-primary">{children}</p>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-bold text-accent">{children}</strong>
+        ),
+        em: ({ children }) => (
+          <em className="italic text-text-secondary">{children}</em>
+        ),
         hr: () => <hr className="border-surface-3 my-4" />,
-
-        // Link
         a: ({ href, children }) => (
-          <a href={href} target="_blank" rel="noopener noreferrer"
-            className="text-accent underline underline-offset-2 hover:text-accent-dim transition-colors">
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent underline underline-offset-2 hover:text-accent-dim transition-colors"
+          >
             {children}
           </a>
         ),
@@ -159,9 +247,9 @@ function MD({ content }: { content: string }) {
   );
 }
 
-// ── Copy button ───────────────────────────────────────────────
 function CopyBtn({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
+
   return (
     <button
       onClick={async () => {
@@ -176,29 +264,17 @@ function CopyBtn({ text }: { text: string }) {
   );
 }
 
-// ── Image với fallback và nhiều nguồn ảnh ────────────────────
-function Img({ src, alt }: { src: string; alt: string }) {
+function Img({
+  src,
+  alt,
+  userImage = false,
+}: {
+  src: string;
+  alt: string;
+  userImage?: boolean;
+}) {
   const [err, setErr] = useState(false);
   const [loaded, setLoaded] = useState(false);
-
-  // Nếu Unsplash source lỗi, thử fallback sang Picsum
-  const fallbackSrc = src.includes("unsplash.com")
-    ? `https://picsum.photos/seed/${encodeURIComponent(alt)}/800/450`
-    : src.includes("picsum.photos")
-    ? `https://placehold.co/800x450/1e2535/6ee7b7?text=${encodeURIComponent(alt)}`
-    : `https://placehold.co/800x450/1e2535/6ee7b7?text=${encodeURIComponent(alt)}`;
-
-  const [currentSrc, setCurrentSrc] = useState(src);
-
-  const handleError = () => {
-    if (currentSrc === src) {
-      // Thử fallback lần 1
-      setCurrentSrc(fallbackSrc);
-    } else {
-      // Fallback lần 2 — hiện placeholder text
-      setErr(true);
-    }
-  };
 
   if (err) {
     return (
@@ -211,26 +287,27 @@ function Img({ src, alt }: { src: string; alt: string }) {
 
   return (
     <figure className="my-4">
-      {/* Skeleton loader khi ảnh đang load */}
       {!loaded && (
-        <div className="rounded-2xl bg-surface-2 border border-surface-3 animate-pulse"
-          style={{ height: "240px" }} />
+        <div
+          className="rounded-2xl bg-surface-2 border border-surface-3 animate-pulse"
+          style={{ height: "240px" }}
+        />
       )}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+
       <img
-        src={currentSrc}
+        src={src}
         alt={alt}
-        onError={handleError}
+        onError={() => setErr(true)}
         onLoad={() => setLoaded(true)}
         loading="lazy"
-        crossOrigin="anonymous"
-        referrerPolicy="no-referrer"
         className={clsx(
-          "rounded-2xl w-full border border-surface-3 object-cover transition-opacity duration-300",
-          loaded ? "opacity-100" : "opacity-0 absolute"
+          "rounded-2xl w-full border border-surface-3 transition-opacity duration-300",
+          loaded ? "opacity-100" : "opacity-0 absolute",
+          userImage ? "object-contain bg-surface-2" : "object-cover"
         )}
         style={{ maxHeight: "400px" }}
       />
+
       {alt && loaded && (
         <figcaption className="text-xs text-text-muted text-center mt-1.5 italic">
           {alt}
