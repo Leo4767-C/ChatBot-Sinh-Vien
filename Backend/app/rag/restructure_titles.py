@@ -1,95 +1,15 @@
 import logging
-import os
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
-
-from dotenv import load_dotenv
-from langchain_core.output_parsers import JsonOutputParser
-from langchain_core.runnables import RunnableLambda
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from unstructured.partition.auto import partition
 from unstructured.partition.html import partition_html
 from unstructured.partition.md import partition_md
 from unstructured.partition.text import partition_text
 
-from app.core.config import settings
-
 log = logging.getLogger(__name__)
-
-guide_v2 = """
-{
-  "titleId": "f9c914bbe5fe7cce8avjfkdkdkdkdkd",
-  "title": "Tài liệu ôn tập",
-  "content": "",
-  "page_number": -1,
-  "children": [
-    {
-      "titleId": "f9c914bbe5fe7cce8abde153f607eaea",
-      "title": "Chương 1: Giới thiệu",
-      "content": "",
-      "page_number": 1,
-      "children": [
-        {
-          "titleId": "ab2c809cc6f2cd1f114dd9fddbdae7b2",
-          "title": "1.1. Khái niệm cơ bản",
-          "content": "",
-          "page_number": 1,
-          "children": []
-        }
-      ]
-    }
-  ]
-}
-"""
-
-load_dotenv()
-
-
-def format_prompt(raw_data: dict[str, list[Any]]) -> dict[str, str]:
-    prompt = (
-        "Bạn là trợ lý chuyên cấu trúc lại dữ liệu tiêu đề tài liệu tiếng Việt.\n"
-        "Bạn được cung cấp một dictionary Python, trong đó:\n"
-        "- Key là ID duy nhất của tiêu đề.\n"
-        "- Value là một list gồm [title, page_number].\n"
-        "Các tiêu đề có thể có hoặc không có đánh số đề mục.\n\n"
-        f"Nhiệm vụ: chuyển dữ liệu này thành JSON đúng cấu trúc sau:\n```{guide_v2}```\n\n"
-        "Quy tắc:\n"
-        "- titleId: ID duy nhất của đề mục.\n"
-        "- title: tên đề mục.\n"
-        "- content: luôn để chuỗi rỗng.\n"
-        "- page_number: số trang tương ứng.\n"
-        "- children: danh sách đề mục con.\n\n"
-        f"Dữ liệu đầu vào:\n```{raw_data}```\n\n"
-        "Chỉ trả về JSON hợp lệ, không giải thích thêm."
-    )
-    return {"prompt": prompt}
-
-
-def build_chain():
-    api_key = (
-        getattr(settings, "GEMINI_API_KEY", None)
-        or os.getenv("GOOGLE_API_KEY")
-        or os.getenv("GEMINI_API_KEY")
-    )
-    model = ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",
-        temperature=0,
-        api_key=api_key,
-    )
-    chain = (
-        RunnableLambda(format_prompt)
-        | (lambda x: x["prompt"])
-        | model
-        | JsonOutputParser()
-    )
-    return chain
-
-
-def restructure(raw_data: dict[str, list[Any]]) -> dict:
-    chain = build_chain()
-    return chain.invoke(raw_data)
 
 
 class Chunk:
@@ -104,36 +24,36 @@ class Chunk:
         self.title_id = title_id
         self.title = title
         self.content = content
-        self.image_paths = image_paths
-        self.pages = pages
+        self.image_paths = image_paths or set()
+        self.pages = pages or set()
 
     def get_pages_list(self) -> list[int]:
-        return [] if self.pages is None else sorted(list(self.pages))
+        return sorted(list(self.pages))
 
     def get_image_paths_list(self) -> list[str]:
-        return [] if self.image_paths is None else list(self.image_paths)
+        return list(self.image_paths)
 
     def add_image_path(self, path: str | None):
-        if not path:
-            return
-        if self.image_paths is None:
-            self.image_paths = set()
-        self.image_paths.add(path)
+        if path:
+            self.image_paths.add(path)
 
     def add_page_ref(self, page: int | None):
-        if page is None or page < 1:
+        if page is None:
             return
-        if self.pages is None:
-            self.pages = set()
-        self.pages.add(page)
+        try:
+            page = int(page)
+            if page > 0:
+                self.pages.add(page)
+        except Exception:
+            return
 
     def to_dict(self):
         return {
             "title_id": self.title_id,
             "title": self.title,
             "content": self.content,
-            "image_paths": [] if self.image_paths is None else list(self.image_paths),
-            "pages": [] if self.pages is None else list(self.pages),
+            "image_paths": list(self.image_paths),
+            "pages": sorted(list(self.pages)),
         }
 
 
@@ -149,32 +69,207 @@ def _make_title_id(title: str, page_number: int) -> str:
     return str(abs(hash(f"{title.strip()}::{page_number}")))
 
 
-def _is_title_element(el: Any) -> bool:
-    category = getattr(el, "category", "") or ""
-    text = (getattr(el, "text", "") or "").strip()
+def _clean_text(text: str) -> str:
+    text = (text or "").replace("\xa0", " ")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _partition_file(file_path: Path):
+    file_ext = file_path.suffix.lower()
+
+    if file_ext == ".md":
+        return partition_md(filename=str(file_path))
+    if file_ext in [".html", ".htm"]:
+        return partition_html(filename=str(file_path))
+    if file_ext == ".txt":
+        return partition_text(filename=str(file_path))
+
+    return partition(filename=str(file_path))
+
+
+def _roman_to_int(token: str) -> int:
+    roman_map = {"i": 1, "v": 5, "x": 10, "l": 50, "c": 100}
+    token = token.lower()
+    total = 0
+    prev = 0
+    for ch in reversed(token):
+        val = roman_map.get(ch, 0)
+        if val < prev:
+            total -= val
+        else:
+            total += val
+            prev = val
+    return total
+
+
+def _extract_heading_level(text: str) -> int | None:
+    """
+    Heuristic level detector:
+    1 -> Chương / Phần / Mục lớn / I. / 1.
+    2 -> 1.1 / 1.1.
+    3 -> 1.1.1 / 1.1.1.
+    4 -> deeper numbered
+    """
+    t = _clean_text(text)
+    if not t:
+        return None
+
+    lower = t.lower()
+
+    if lower.startswith(("chương ", "chuong ", "phần ", "phan ")):
+        return 1
+
+    if lower.startswith(("mục ", "muc ")):
+        return 2
+
+    m_roman = re.match(r"^([ivxlcdm]+)[\.\)]\s+", lower)
+    if m_roman and _roman_to_int(m_roman.group(1)) > 0:
+        return 1
+
+    m_num = re.match(r"^(\d+(?:\.\d+){0,5})[\.\)]?\s+", t)
+    if m_num:
+        depth = m_num.group(1).count(".")
+        if depth == 0:
+            return 1
+        if depth == 1:
+            return 2
+        if depth == 2:
+            return 3
+        return 4
+
+    return None
+
+
+def _looks_like_heading(text: str, category: str = "") -> bool:
+    t = _clean_text(text)
+    if not t:
+        return False
 
     if category == "Title":
         return True
 
-    if not text:
+    if len(t) > 180:
         return False
 
-    if len(text) <= 120 and (
-        text.isupper()
-        or text.startswith("Chương ")
-        or text.startswith("CHƯƠNG ")
-        or text.startswith("Phần ")
-        or text.startswith("PHẦN ")
-        or text.startswith("Mục ")
-        or text.startswith("MỤC ")
-    ):
+    if _extract_heading_level(t) is not None:
         return True
 
-    numbered_prefixes = tuple(str(i) for i in range(1, 21))
-    if text[0:1].isdigit() and any(text.startswith(p) for p in numbered_prefixes):
+    if t.isupper() and len(t) <= 120:
+        return True
+
+    if re.match(r"^(Điều|Khoản|Mục|Phần|Chương)\b", t, flags=re.IGNORECASE):
         return True
 
     return False
+
+
+def _heading_level(text: str, category: str = "") -> int:
+    level = _extract_heading_level(text)
+    if level is not None:
+        return level
+
+    t = _clean_text(text)
+
+    if category == "Title":
+        return 2 if len(t) <= 100 else 3
+
+    if t.isupper() and len(t) <= 120:
+        return 1
+
+    if re.match(r"^(Điều)\b", t, flags=re.IGNORECASE):
+        return 2
+
+    if re.match(r"^(Khoản)\b", t, flags=re.IGNORECASE):
+        return 3
+
+    return 3
+
+
+def _flat_txt_fallback(file_path: Path) -> dict:
+    text = file_path.read_text(encoding="utf-8").strip()
+    return {
+        "titleId": _make_title_id(file_path.stem, 1),
+        "title": file_path.stem,
+        "content": text,
+        "page_number": 1,
+        "children": [],
+        "pages": [1],
+        "image_paths": [],
+    }
+
+
+def _new_node(title: str, page_number: int) -> dict:
+    return {
+        "titleId": _make_title_id(title, page_number),
+        "title": title,
+        "content": "",
+        "page_number": page_number,
+        "children": [],
+        "pages": [page_number] if page_number > 0 else [],
+        "image_paths": [],
+    }
+
+
+def _append_content(node: dict, text: str, page_number: int):
+    text = _clean_text(text)
+    if not text:
+        return
+
+    if node.get("content"):
+        node["content"] += "\n\n" + text
+    else:
+        node["content"] = text
+
+    node.setdefault("pages", [])
+    if page_number > 0 and page_number not in node["pages"]:
+        node["pages"].append(page_number)
+
+
+def _ensure_root(file_path: Path) -> dict:
+    return {
+        "titleId": _make_title_id(file_path.stem, -1),
+        "title": file_path.stem,
+        "content": "",
+        "page_number": -1,
+        "children": [],
+        "pages": [],
+        "image_paths": [],
+    }
+
+
+def _build_tree_rule_based(elements: list[Any], file_path: Path) -> dict:
+    root = _ensure_root(file_path)
+    stack: list[tuple[int, dict]] = [(0, root)]
+    current_node = root
+    current_page = 1
+
+    for el in elements:
+        text = _clean_text(getattr(el, "text", "") or "")
+        if not text:
+            continue
+
+        metadata = getattr(el, "metadata", None)
+        category = getattr(el, "category", "") or ""
+        page_number = getattr(metadata, "page_number", None) if metadata else None
+        if page_number:
+            current_page = _safe_page_number(page_number)
+
+        if _looks_like_heading(text, category):
+            level = _heading_level(text, category)
+            node = _new_node(text, current_page)
+
+            while stack and stack[-1][0] >= level:
+                stack.pop()
+
+            parent = stack[-1][1] if stack else root
+            parent.setdefault("children", []).append(node)
+            stack.append((level, node))
+            current_node = node
+        else:
+            _append_content(current_node, text, current_page)
+
+    return root
 
 
 def build_chunks_dict(content_items: list[dict[str, Any]]) -> dict[str, Chunk]:
@@ -193,7 +288,7 @@ def build_chunks_dict(content_items: list[dict[str, Any]]) -> dict[str, Chunk]:
                 image_paths=set(),
             )
 
-        text = (item.get("text") or "").strip()
+        text = _clean_text(item.get("text") or "")
         if text:
             if chunks[title_id].content:
                 chunks[title_id].content += "\n\n" + text
@@ -262,7 +357,7 @@ def attach_table_images_to_tree(structured: dict, table_items: list[dict]) -> di
     for item in table_items:
         image_path = item.get("image_path")
         page = item.get("page")
-        table_text = (item.get("table_text") or "").strip()
+        table_text = _clean_text(item.get("table_text") or "")
 
         if not image_path:
             continue
@@ -270,7 +365,11 @@ def attach_table_images_to_tree(structured: dict, table_items: list[dict]) -> di
         target_node = None
 
         if page is not None:
-            matched_nodes = page_to_nodes.get(int(page), [])
+            try:
+                matched_nodes = page_to_nodes.get(int(page), [])
+            except Exception:
+                matched_nodes = []
+
             if matched_nodes:
                 target_node = max(
                     matched_nodes,
@@ -290,37 +389,17 @@ def attach_table_images_to_tree(structured: dict, table_items: list[dict]) -> di
             target_node["content"] = old_content + extra if old_content else extra.strip()
 
         if page is not None:
-            target_node.setdefault("pages", [])
-            if int(page) not in target_node["pages"]:
-                target_node["pages"].append(int(page))
+            try:
+                page_int = int(page)
+            except Exception:
+                page_int = None
+
+            if page_int is not None:
+                target_node.setdefault("pages", [])
+                if page_int not in target_node["pages"]:
+                    target_node["pages"].append(page_int)
 
     return structured
-
-
-def _flat_txt_fallback(file_path: Path) -> dict:
-    text = file_path.read_text(encoding="utf-8").strip()
-    return {
-        "titleId": _make_title_id(file_path.stem, 1),
-        "title": file_path.stem,
-        "content": text,
-        "page_number": 1,
-        "children": [],
-        "pages": [1],
-        "image_paths": [],
-    }
-
-
-def _partition_file(file_path: Path):
-    file_ext = file_path.suffix.lower()
-
-    if file_ext == ".md":
-        return partition_md(filename=str(file_path))
-    if file_ext in [".html", ".htm"]:
-        return partition_html(filename=str(file_path))
-    if file_ext == ".txt":
-        return partition_text(filename=str(file_path))
-
-    return partition(filename=str(file_path))
 
 
 def chunk_by_title(file_path: str | Path) -> dict:
@@ -339,74 +418,30 @@ def chunk_by_title(file_path: str | Path) -> dict:
 
     elements = _partition_file(file_path)
 
-    raw_titles: dict[str, list[Any]] = {}
-    content_items: list[dict[str, Any]] = []
-    current_title_id: str | None = None
-    current_page = 1
+    if not elements:
+        return _ensure_root(file_path)
 
-    for el in elements:
-        text = (getattr(el, "text", None) or "").strip()
-        if not text:
-            continue
+    structured = _build_tree_rule_based(elements, file_path)
 
-        metadata = getattr(el, "metadata", None)
-        page_number = getattr(metadata, "page_number", None) if metadata else None
-        if page_number:
-            current_page = _safe_page_number(page_number)
-
-        if _is_title_element(el):
-            title_id = _make_title_id(text, current_page)
-            raw_titles[title_id] = [text, current_page]
-            current_title_id = title_id
-        else:
-            content_items.append(
+    # Nếu root không có children, nhét toàn bộ text vào root
+    if not structured.get("children"):
+        all_text = "\n\n".join(
+            _clean_text(getattr(el, "text", "") or "")
+            for el in elements
+            if _clean_text(getattr(el, "text", "") or "")
+        ).strip()
+        structured["content"] = all_text
+        structured["pages"] = sorted(
+            list(
                 {
-                    "title_id": current_title_id,
-                    "text": text,
-                    "page_number": current_page,
+                    _safe_page_number(getattr(getattr(el, "metadata", None), "page_number", 1))
+                    for el in elements
+                    if getattr(el, "metadata", None) is not None
                 }
             )
-
-    if not raw_titles:
-        all_text = "\n\n".join(
-            (getattr(el, "text", "") or "").strip()
-            for el in elements
-            if (getattr(el, "text", "") or "").strip()
-        ).strip()
-
-        return {
-            "titleId": _make_title_id(file_path.stem, 1),
-            "title": file_path.stem,
-            "content": all_text,
-            "page_number": 1,
-            "children": [],
-            "pages": [1],
-            "image_paths": [],
-        }
-
-    try:
-        structured = restructure(raw_titles)
-    except Exception as e:
-        log.warning("LLM restructure failed, fallback tree 1 cấp: %s", e)
-        structured = {
-            "titleId": _make_title_id(file_path.stem, -1),
-            "title": file_path.stem,
-            "content": "",
-            "page_number": -1,
-            "children": [
-                {
-                    "titleId": title_id,
-                    "title": title_page[0],
-                    "content": "",
-                    "page_number": _safe_page_number(title_page[1]),
-                    "children": [],
-                }
-                for title_id, title_page in raw_titles.items()
-            ],
-        }
-
-    chunks = build_chunks_dict(content_items)
-    structured = merge_content(structured, chunks)
+        )
+        structured.setdefault("image_paths", [])
+        return structured
 
     structured.setdefault("titleId", _make_title_id(file_path.stem, -1))
     structured.setdefault("title", file_path.stem)

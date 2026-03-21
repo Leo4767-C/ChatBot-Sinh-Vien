@@ -1,12 +1,11 @@
 """
 Chat router — RAG + Gemini streaming + hỗ trợ ảnh người dùng upload.
 - Không hiểu nhầm "tiếng Anh" thành "ảnh"
-- Chỉ hiện ảnh khi user có ý định xem trực quan
-- Lọc ảnh theo semantic similarity giữa câu hỏi và nội dung ảnh/chunk
+- Ưu tiên trả bảng Markdown khi câu hỏi đụng nội dung bảng
+- Không tự stream ảnh bảng trong luồng hỏi đáp text
 """
 import json
 import logging
-import math
 import re
 import unicodedata
 import uuid
@@ -25,7 +24,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.models.database import AsyncSessionLocal, ChatMessage, Session, get_db
-from app.rag.embedder import get_embeddings
 from app.rag.retriever import Retriever
 
 logger = logging.getLogger(__name__)
@@ -46,6 +44,8 @@ SYSTEM_INSTRUCTION = """Bạn là StudyBot — trợ lý nghiên cứu khoa họ
 
 Quy tắc:
 - Ưu tiên thông tin từ [CONTEXT] nếu có.
+- Khi thông tin phù hợp với dạng bảng, ưu tiên trả lời bằng bảng Markdown thay vì mô tả dài dòng.
+- Không bao giờ in ra đường dẫn ảnh, tên file ảnh, hoặc URL nội bộ như /images/...
 - Nếu người dùng gửi ảnh tài liệu hoặc ảnh có chữ:
   - ưu tiên đọc phần chữ và nội dung văn bản
   - nếu người dùng yêu cầu tóm tắt, hãy tóm tắt nội dung chính
@@ -96,36 +96,10 @@ def _normalize_text(text: str) -> str:
     return text
 
 
-def _wants_visual(question: str) -> bool:
-    """
-    Chỉ nhận diện ý định muốn xem trực quan.
-    Không bắt keyword đơn lẻ 'anh' để tránh nhầm với 'tiếng Anh'.
-    """
-    q = _normalize_text(question)
-    phrases = [
-        "xem anh",
-        "xem hinh",
-        "cho xem anh",
-        "cho xem hinh",
-        "in ra bang",
-        "hien thi bang",
-        "xem bang",
-        "mo bang",
-        "hien thi anh",
-        "hien thi hinh",
-        "xem hinh minh hoa",
-        "in ra hinh",
-        "picture",
-        "image",
-        "photo",
-    ]
-    return any(p in q for p in phrases)
-
-
 def _is_image_followup(question: str) -> bool:
     """
-    Chỉ dùng cho luồng hỏi tiếp về ảnh đã upload.
-    Không dùng từ đơn 'anh'.
+    Chỉ dùng cho luồng hỏi tiếp về ảnh user đã upload.
+    Không dùng từ đơn 'anh' để tránh nhầm với 'tiếng Anh'.
     """
     q = _normalize_text(question)
     phrases = [
@@ -166,85 +140,30 @@ def _is_text_focused_image_request(question: str) -> bool:
     return any(k in q for k in keywords)
 
 
-def _to_list(x):
-    if x is None:
-        return None
-    if hasattr(x, "tolist"):
-        return x.tolist()
-    return x
-
-
-def _cosine_similarity(a: list[float], b: list[float]) -> float:
-    if not a or not b or len(a) != len(b):
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
-    na = math.sqrt(sum(x * x for x in a))
-    nb = math.sqrt(sum(y * y for y in b))
-    if na == 0 or nb == 0:
-        return 0.0
-    return dot / (na * nb)
-
-
-async def _collect_relevant_images_semantic(question: str, chunks: list, limit: int = 2) -> list[str]:
-    """
-    Chỉ lấy ảnh nếu:
-    1) user có ý định xem trực quan
-    2) ảnh/chunk đủ liên quan ngữ nghĩa với câu hỏi
-    """
-    if not _wants_visual(question):
-        return []
-
-    try:
-        q_dense, _, _ = get_embeddings([question])
-        if q_dense is None or len(q_dense) == 0:
-            return []
-        q_vec = _to_list(q_dense[0])
-        if not q_vec:
-            return []
-    except Exception as e:
-        logger.warning("Image semantic filter embedding failed: %s", e)
-        return []
-
-    candidates: list[tuple[float, str]] = []
-    seen = set()
-
-    for c in chunks:
-        payload = c.payload or {}
-        image_urls = payload.get("image_urls", []) or []
-        if not image_urls:
-            continue
-
-        rep_text_parts = []
-        rep_text_parts.extend(payload.get("image_descs", []) or [])
-        rep_text_parts.append(payload.get("content", "") or "")
-        rep_text_parts.append(payload.get("doc_name", "") or "")
-        rep_text = "\n".join([x for x in rep_text_parts if x]).strip()
-
-        if not rep_text:
-            continue
-
-        try:
-            d_dense, _, _ = get_embeddings([rep_text])
-            if d_dense is None or len(d_dense) == 0:
-                continue
-            d_vec = _to_list(d_dense[0])
-            score = _cosine_similarity(q_vec, d_vec)
-        except Exception as e:
-            logger.warning("Image candidate embedding failed: %s", e)
-            score = 0.0
-
-        for url in image_urls:
-            if url and url not in seen:
-                seen.add(url)
-                candidates.append((score, url))
-
-    candidates.sort(key=lambda x: x[0], reverse=True)
-
-    threshold = 0.45
-    selected = [url for score, url in candidates if score >= threshold][:limit]
-
-    logger.info("Selected %s relevant images for question='%s'", len(selected), question)
-    return selected
+def _wants_table_answer(question: str) -> bool:
+    q = _normalize_text(question)
+    phrases = [
+        "cac ",
+        "danh sach",
+        "bao gom",
+        "gom nhung gi",
+        "duoc cong nhan",
+        "tuong duong",
+        "tham chieu",
+        "muc diem",
+        "cac muc",
+        "co so",
+        "to chuc",
+        "chung chi",
+        "hoc phi",
+        "diem chuan",
+        "quy dinh",
+        "bang",
+        "in ra bang",
+        "dang bang",
+        "trinh bay dang bang",
+    ]
+    return any(p in q for p in phrases)
 
 
 def _build_upload_image_prompt(user_prompt: str) -> str:
@@ -370,26 +289,37 @@ async def _stream_text_answer(
                 content = payload.get("content", "")
                 doc_name = payload.get("doc_name", "")
                 updated = payload.get("created_at", "")
-                image_urls = payload.get("image_urls", []) or []
                 img_descs = payload.get("image_descs", []) or []
+                is_table = bool(payload.get("is_table", False))
 
-                ctx_text = f"[CONTEXT {i}] Nguồn: {doc_name} | Cập nhật: {updated}\n{content}"
+                label = "BẢNG" if is_table else "CONTEXT"
+                ctx_text = f"[{label} {i}] Nguồn: {doc_name} | Cập nhật: {updated}\n{content}"
 
-                if image_urls:
-                    img_lines = []
-                    for idx, url in enumerate(image_urls):
-                        desc = img_descs[idx] if idx < len(img_descs) else ""
-                        img_lines.append(f"[HÌNH ẢNH: {url}] {desc}".strip())
-                    ctx_text += "\n" + "\n".join(img_lines)
+                if img_descs:
+                    desc_lines = [f"[HÌNH ẢNH] {desc}" for desc in img_descs if desc]
+                    if desc_lines:
+                        ctx_text += "\n" + "\n".join(desc_lines)
 
                 ctx_parts.append(ctx_text)
 
             if ctx_parts:
                 src_str = ", ".join(f"**{n}**" for n in source_names if n)
+
+                extra_instruction = ""
+                if _wants_table_answer(question):
+                    extra_instruction = (
+                        "\n\nYÊU CẦU ĐỊNH DẠNG:\n"
+                        "- Nếu dữ liệu trong ngữ cảnh là dạng liệt kê, đối chiếu, mức điểm, danh sách tổ chức hoặc bảng quy đổi, hãy trình bày bằng bảng Markdown.\n"
+                        "- Không in đường dẫn ảnh, tên file ảnh, hoặc URL nội bộ.\n"
+                        "- Nếu có cột STT thì giữ cột STT.\n"
+                        "- Nếu dữ liệu không đủ rõ để thành bảng đầy đủ, hãy trả lời bằng bullet ngắn gọn.\n"
+                    )
+
                 prompt = (
                     f"Tài liệu tham khảo: {src_str}\n\n"
                     f"{'---'.join(ctx_parts)}\n\n"
                     f"Câu hỏi: {question}"
+                    f"{extra_instruction}"
                 )
             else:
                 prompt = question
@@ -400,9 +330,8 @@ async def _stream_text_answer(
             if source_names:
                 yield f"data: [SOURCES]{json.dumps(source_names, ensure_ascii=False)}\n\n"
 
-            selected_images = await _collect_relevant_images_semantic(question, chunks, limit=2)
-            if selected_images:
-                yield f"data: [IMAGES]{json.dumps(selected_images, ensure_ascii=False)}\n\n"
+            # Không tự stream ảnh trong luồng text nữa
+            selected_images: list[str] = []
 
             model = genai.GenerativeModel(
                 model_name=settings.GEMINI_MODEL,
