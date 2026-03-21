@@ -1,5 +1,6 @@
 import logging
 import os
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -107,7 +108,7 @@ class Chunk:
         self.pages = pages
 
     def get_pages_list(self) -> list[int]:
-        return [] if self.pages is None else list(self.pages)
+        return [] if self.pages is None else sorted(list(self.pages))
 
     def get_image_paths_list(self) -> list[str]:
         return [] if self.image_paths is None else list(self.image_paths)
@@ -185,7 +186,12 @@ def build_chunks_dict(content_items: list[dict[str, Any]]) -> dict[str, Chunk]:
             continue
 
         if title_id not in chunks:
-            chunks[title_id] = Chunk(title_id=title_id, content="", pages=set(), image_paths=set())
+            chunks[title_id] = Chunk(
+                title_id=title_id,
+                content="",
+                pages=set(),
+                image_paths=set(),
+            )
 
         text = (item.get("text") or "").strip()
         if text:
@@ -202,9 +208,6 @@ def build_chunks_dict(content_items: list[dict[str, Any]]) -> dict[str, Chunk]:
 
 
 def merge_content(node: dict, chunks: dict[str, Chunk], depth: int = 0):
-    """
-    Gắn content/pages/image_paths từ chunks vào cây cấu trúc.
-    """
     if not isinstance(node, dict):
         return node
 
@@ -226,6 +229,72 @@ def merge_content(node: dict, chunks: dict[str, Chunk], depth: int = 0):
             merge_content(child, chunks, depth + 1)
 
     return node
+
+
+def _walk_nodes(node: dict):
+    if not isinstance(node, dict):
+        return
+    yield node
+    children = node.get("children", [])
+    if isinstance(children, list):
+        for child in children:
+            yield from _walk_nodes(child)
+
+
+def attach_table_images_to_tree(structured: dict, table_items: list[dict]) -> dict:
+    """
+    Gắn ảnh bảng vào node gần nhất theo page.
+    table_item: {image_path, page, table_text, type}
+    """
+    if not structured or not table_items:
+        return structured
+
+    page_to_nodes: dict[int, list[dict]] = defaultdict(list)
+    all_nodes = list(_walk_nodes(structured))
+
+    for node in all_nodes:
+        for p in node.get("pages", []) or []:
+            try:
+                page_to_nodes[int(p)].append(node)
+            except Exception:
+                continue
+
+    for item in table_items:
+        image_path = item.get("image_path")
+        page = item.get("page")
+        table_text = (item.get("table_text") or "").strip()
+
+        if not image_path:
+            continue
+
+        target_node = None
+
+        if page is not None:
+            matched_nodes = page_to_nodes.get(int(page), [])
+            if matched_nodes:
+                target_node = max(
+                    matched_nodes,
+                    key=lambda n: len((n.get("content") or "").strip())
+                )
+
+        if target_node is None:
+            target_node = structured
+
+        target_node.setdefault("image_paths", [])
+        if image_path not in target_node["image_paths"]:
+            target_node["image_paths"].append(image_path)
+
+        if table_text:
+            old_content = (target_node.get("content") or "").strip()
+            extra = f"\n\n[BẢNG]\n{table_text}"
+            target_node["content"] = old_content + extra if old_content else extra.strip()
+
+        if page is not None:
+            target_node.setdefault("pages", [])
+            if int(page) not in target_node["pages"]:
+                target_node["pages"].append(int(page))
+
+    return structured
 
 
 def _flat_txt_fallback(file_path: Path) -> dict:
@@ -251,7 +320,6 @@ def _partition_file(file_path: Path):
     if file_ext == ".txt":
         return partition_text(filename=str(file_path))
 
-    # pdf/docx/... để auto xử lý
     return partition(filename=str(file_path))
 
 
@@ -266,7 +334,6 @@ def chunk_by_title(file_path: str | Path) -> dict:
             "Vui lòng cung cấp file Text (.txt), Markdown (.md), HTML (.html) hoặc PDF/DOCX."
         )
 
-    # Với txt: ưu tiên fallback đơn giản để ingest ổn định
     if file_ext == ".txt":
         return _flat_txt_fallback(file_path)
 
@@ -300,7 +367,6 @@ def chunk_by_title(file_path: str | Path) -> dict:
                 }
             )
 
-    # Nếu không bóc được title nào thì fallback thành 1 chunk
     if not raw_titles:
         all_text = "\n\n".join(
             (getattr(el, "text", "") or "").strip()
