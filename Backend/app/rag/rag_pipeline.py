@@ -54,13 +54,18 @@ class RAGPipeline:
 
         final_context = "\n\n".join(contexts)
 
+        # CẬP NHẬT 1: Đưa bot_instruction vào để Bot nghe lời cấu hình từ DB
         sys_prompt = (
-            bot_instruction.replace("{{org}}", org or "")
-            .replace("{{context}}", final_context)
-            .replace("{{at_time}}", datetime.now(timezone.utc).isoformat())
-            .replace("{{question}}", question)
+            f"Bạn là Trợ lý Nghiên cứu Khoa học của trường đại học. "
+            f"Nhiệm vụ của bạn là trả lời câu hỏi dựa trên ngữ cảnh được cung cấp dưới đây.\n"
+            f"CHỈ THỊ ĐẶC BIỆT CỦA BOT: {bot_instruction}\n\n"
+            f"NGỮ CẢNH (CONTEXT):\n{final_context}\n\n"
+            f"HƯỚNG DẪN:\n"
+            f"1. Nếu câu trả lời có trong NGỮ CẢNH, hãy ưu tiên sử dụng thông tin đó.\n"
+            f"2. Nếu không có trong NGỮ CẢNH, hãy dùng kiến thức chuyên môn của bạn nhưng phải nêu rõ 'Dựa trên kiến thức chung...'.\n"
+            f"3. Sử dụng Markdown để trình bày (in đậm, danh sách).\n"
+            f"4. Nếu người dùng yêu cầu hình ảnh, hãy sử dụng cú pháp: ![mô tả](/images/ten_file_anh.png) nếu ảnh có trong ngữ cảnh."
         )
-
         processor = LLMResponseProcessor()
 
         if stream:
@@ -81,15 +86,18 @@ class RAGPipeline:
             is_start_yield = True
             start_yield = start
 
-            # Fix Bug #3: stream_process giờ là async generator, dùng `async for`
-            # Fix Bug #2: DB session được đóng bên trong stream_process (finally block)
-            async for result in processor.stream_process(
-                llm_stream, retrieved_chunks, conversation_uid, SessionLocal()
-            ):
-                if is_start_yield:
-                    start_yield = int(time.time() * 1000)
-                    is_start_yield = False
-                yield result
+            # CẬP NHẬT 2: Quản lý kết nối Database an toàn (Chống rò rỉ Memory/DB)
+            db_session = SessionLocal()
+            try:
+                async for result in processor.stream_process(
+                    llm_stream, retrieved_chunks, conversation_uid, db_session
+                ):
+                    if is_start_yield:
+                        start_yield = int(time.time() * 1000)
+                        is_start_yield = False
+                    yield result
+            finally:
+                db_session.close() # Dù lỗi hay chạy xong đều tự động ngắt kết nối
 
             metadata = processor.get_metadata()
             scores = metadata.get('scores', [])
