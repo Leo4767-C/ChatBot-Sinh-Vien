@@ -1,8 +1,17 @@
+export type ChatSource = {
+  id?: string | number;
+  title?: string;
+  name?: string;
+  filename?: string;
+  file_name?: string;
+  source?: string;
+};
+
 export type Message = {
   role: "user" | "model";
   content: string;
   isStreaming?: boolean;
-  sources?: string[];
+  sources?: ChatSource[];
   images?: string[];
 };
 
@@ -16,5 +25,6 @@ export type ChatSession = {
 export type ImageChatResponse = {
   ok: boolean;
   answer: string;
-  image_url: string;
+  image_url?: string;
+  sources?: ChatSource[];
 };

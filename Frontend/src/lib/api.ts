@@ -7,10 +7,20 @@ export interface ChatSession {
   updated_at: string;
 }
 
+export interface ChatSource {
+  id?: string | number;
+  title?: string;
+  name?: string;
+  filename?: string;
+  file_name?: string;
+  source?: string;
+}
+
 export interface ImageChatResponse {
   ok: boolean;
   answer: string;
-  image_url: string;
+  image_url?: string;
+  sources?: ChatSource[];
 }
 
 export async function createSession(): Promise<ChatSession> {
@@ -62,10 +72,10 @@ export async function streamChat(
   sessionId: string,
   question: string,
   onChunk: (t: string) => void,
-  onSources: (s: string[]) => void,
+  onSources: (s: ChatSource[]) => void,
   onDone: () => void,
   onError: (e: string) => void,
-  onImages?: (urls: string[]) => void,
+  onImages?: (urls: string[]) => void
 ) {
   let r: Response;
   try {

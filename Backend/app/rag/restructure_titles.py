@@ -1,6 +1,5 @@
 import logging
 import re
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -18,24 +17,15 @@ class Chunk:
         title_id: str | None = None,
         title: str = "",
         content: str = "",
-        image_paths: set[str] | None = None,
         pages: set[int] | None = None,
     ):
         self.title_id = title_id
         self.title = title
         self.content = content
-        self.image_paths = image_paths or set()
         self.pages = pages or set()
 
     def get_pages_list(self) -> list[int]:
         return sorted(list(self.pages))
-
-    def get_image_paths_list(self) -> list[str]:
-        return list(self.image_paths)
-
-    def add_image_path(self, path: str | None):
-        if path:
-            self.image_paths.add(path)
 
     def add_page_ref(self, page: int | None):
         if page is None:
@@ -52,7 +42,6 @@ class Chunk:
             "title_id": self.title_id,
             "title": self.title,
             "content": self.content,
-            "image_paths": list(self.image_paths),
             "pages": sorted(list(self.pages)),
         }
 
@@ -195,7 +184,6 @@ def _flat_txt_fallback(file_path: Path) -> dict:
         "page_number": 1,
         "children": [],
         "pages": [1],
-        "image_paths": [],
     }
 
 
@@ -207,7 +195,6 @@ def _new_node(title: str, page_number: int) -> dict:
         "page_number": page_number,
         "children": [],
         "pages": [page_number] if page_number > 0 else [],
-        "image_paths": [],
     }
 
 
@@ -234,7 +221,6 @@ def _ensure_root(file_path: Path) -> dict:
         "page_number": -1,
         "children": [],
         "pages": [],
-        "image_paths": [],
     }
 
 
@@ -285,7 +271,6 @@ def build_chunks_dict(content_items: list[dict[str, Any]]) -> dict[str, Chunk]:
                 title_id=title_id,
                 content="",
                 pages=set(),
-                image_paths=set(),
             )
 
         text = _clean_text(item.get("text") or "")
@@ -312,11 +297,9 @@ def merge_content(node: dict, chunks: dict[str, Chunk], depth: int = 0):
         if not node.get("content"):
             node["content"] = chunk.content
         node["pages"] = chunk.get_pages_list()
-        node["image_paths"] = chunk.get_image_paths_list()
     else:
         node.setdefault("content", "")
         node.setdefault("pages", [])
-        node.setdefault("image_paths", [])
 
     children = node.get("children", [])
     if isinstance(children, list):
@@ -324,82 +307,6 @@ def merge_content(node: dict, chunks: dict[str, Chunk], depth: int = 0):
             merge_content(child, chunks, depth + 1)
 
     return node
-
-
-def _walk_nodes(node: dict):
-    if not isinstance(node, dict):
-        return
-    yield node
-    children = node.get("children", [])
-    if isinstance(children, list):
-        for child in children:
-            yield from _walk_nodes(child)
-
-
-def attach_table_images_to_tree(structured: dict, table_items: list[dict]) -> dict:
-    """
-    Gắn ảnh bảng vào node gần nhất theo page.
-    table_item: {image_path, page, table_text, type}
-    """
-    if not structured or not table_items:
-        return structured
-
-    page_to_nodes: dict[int, list[dict]] = defaultdict(list)
-    all_nodes = list(_walk_nodes(structured))
-
-    for node in all_nodes:
-        for p in node.get("pages", []) or []:
-            try:
-                page_to_nodes[int(p)].append(node)
-            except Exception:
-                continue
-
-    for item in table_items:
-        image_path = item.get("image_path")
-        page = item.get("page")
-        table_text = _clean_text(item.get("table_text") or "")
-
-        if not image_path:
-            continue
-
-        target_node = None
-
-        if page is not None:
-            try:
-                matched_nodes = page_to_nodes.get(int(page), [])
-            except Exception:
-                matched_nodes = []
-
-            if matched_nodes:
-                target_node = max(
-                    matched_nodes,
-                    key=lambda n: len((n.get("content") or "").strip())
-                )
-
-        if target_node is None:
-            target_node = structured
-
-        target_node.setdefault("image_paths", [])
-        if image_path not in target_node["image_paths"]:
-            target_node["image_paths"].append(image_path)
-
-        if table_text:
-            old_content = (target_node.get("content") or "").strip()
-            extra = f"\n\n[BẢNG]\n{table_text}"
-            target_node["content"] = old_content + extra if old_content else extra.strip()
-
-        if page is not None:
-            try:
-                page_int = int(page)
-            except Exception:
-                page_int = None
-
-            if page_int is not None:
-                target_node.setdefault("pages", [])
-                if page_int not in target_node["pages"]:
-                    target_node["pages"].append(page_int)
-
-    return structured
 
 
 def chunk_by_title(file_path: str | Path) -> dict:
@@ -423,7 +330,6 @@ def chunk_by_title(file_path: str | Path) -> dict:
 
     structured = _build_tree_rule_based(elements, file_path)
 
-    # Nếu root không có children, nhét toàn bộ text vào root
     if not structured.get("children"):
         all_text = "\n\n".join(
             _clean_text(getattr(el, "text", "") or "")
@@ -440,7 +346,6 @@ def chunk_by_title(file_path: str | Path) -> dict:
                 }
             )
         )
-        structured.setdefault("image_paths", [])
         return structured
 
     structured.setdefault("titleId", _make_title_id(file_path.stem, -1))
@@ -449,6 +354,5 @@ def chunk_by_title(file_path: str | Path) -> dict:
     structured.setdefault("page_number", -1)
     structured.setdefault("children", [])
     structured.setdefault("pages", [])
-    structured.setdefault("image_paths", [])
 
     return structured

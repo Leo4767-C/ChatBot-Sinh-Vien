@@ -11,7 +11,9 @@ from app.routers import chat, sessions
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "-1")
 
-IMG_DIR = Path(__file__).parent / "data" / "images"
+# SỬA Ở ĐÂY: ảnh thật đang nằm trong app/data/images
+BASE_DIR = Path(__file__).resolve().parent
+IMG_DIR = BASE_DIR / "app" / "data" / "images"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -29,7 +31,7 @@ app.add_middleware(
     allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
-# Serve ảnh crop từ PDF tại /images/filename.jpg
+# Serve ảnh tại /images/*
 app.mount("/images", StaticFiles(directory=str(IMG_DIR)), name="images")
 
 app.include_router(chat.router)
@@ -37,7 +39,8 @@ app.include_router(sessions.router)
 
 
 @app.get("/")
-async def root(): return {"status": "ok", "version": "3.1.0"}
+async def root():
+    return {"status": "ok", "version": "3.1.0"}
 
 
 @app.get("/health")
@@ -46,7 +49,7 @@ async def health():
     from app.core.config import settings
     try:
         n = qdrant_client.client.get_collection(settings.COLLECTION_NAME).points_count
-    except:
+    except Exception:
         n = 0
     return {"status": "healthy", "qdrant_chunks": n}
 

@@ -10,8 +10,7 @@ from openpyxl.reader.excel import load_workbook
 
 from app.core.config import settings
 from app.rag.converters import DocumentConverter, convert_to_pdf
-from app.rag.restructure_titles import chunk_by_title, attach_table_images_to_tree
-from app.rag.table_extractor import extract_all_tables
+from app.rag.restructure_titles import chunk_by_title
 from app.storage.storage_service import get_storage
 from app.utils.helpers import project_root
 
@@ -41,7 +40,6 @@ def chunk_doc(doc: Dict[str, Any], model: str) -> List[dict]:
     current_chunk: Dict[str, Any] = {
         "text": "",
         "pages": set(),
-        "image_paths": set(),
     }
     chunks: List[Dict[str, Any]] = []
 
@@ -50,7 +48,6 @@ def chunk_doc(doc: Dict[str, Any], model: str) -> List[dict]:
         current_chunk = {
             "text": "",
             "pages": set(),
-            "image_paths": set(),
         }
 
     def header() -> str:
@@ -64,7 +61,6 @@ def chunk_doc(doc: Dict[str, Any], model: str) -> List[dict]:
                 {
                     "text": text,
                     "pages": sorted(list(current_chunk["pages"])),
-                    "image_paths": list(current_chunk["image_paths"]),
                 }
             )
             reset_buffer()
@@ -80,7 +76,7 @@ def chunk_doc(doc: Dict[str, Any], model: str) -> List[dict]:
         except Exception:
             return max(1, int(len(text.split()) * 1.3))
 
-    def add_piece(txt: str, pages: List[int], image_paths: List[str]) -> None:
+    def add_piece(txt: str, pages: List[int]) -> None:
         nonlocal current_chunk
 
         txt = (txt or "").strip()
@@ -105,7 +101,6 @@ def chunk_doc(doc: Dict[str, Any], model: str) -> List[dict]:
 
         current_chunk["text"] += piece
         current_chunk["pages"].update(pages or [])
-        current_chunk["image_paths"].update(image_paths or [])
 
     def dfs(node: Dict[str, Any]) -> None:
         nonlocal current_chunk
@@ -114,20 +109,18 @@ def chunk_doc(doc: Dict[str, Any], model: str) -> List[dict]:
             return
 
         node_pages = node.get("pages", []) or []
-        node_images = node.get("image_paths", []) or []
 
         node_title = (node.get("title") or "").strip()
         if node_title:
             path.append(node_title)
 
         if current_chunk["text"] and node_title:
-            add_piece(node_title + ".", node_pages, node_images)
+            add_piece(node_title + ".", node_pages)
 
         current_chunk["pages"].update(node_pages)
-        current_chunk["image_paths"].update(node_images)
 
         for sent in split_sentences(node.get("content", "")):
-            add_piece(sent, node_pages, node_images)
+            add_piece(sent, node_pages)
 
         for child in node.get("children", []) or []:
             backup_chunk = copy.deepcopy(current_chunk)
@@ -207,10 +200,10 @@ def chunk_excel(file: Path, tokenizer: tiktoken.Encoding, max_len: int = 600) ->
             for i in range(0, header_row - 1):
                 token_count = count_tokens(text, tokenizer) + count_tokens(lines[i], tokenizer)
                 if token_count > max_len:
-                    chunks.append({"text": text, "pages": [], "image_paths": []})
+                    chunks.append({"text": text, "pages": []})
                     text = f"{file.stem} - {sheet_name}:"
                 text += f"\n{lines[i]}"
-            chunks.append({"text": text, "pages": [], "image_paths": []})
+            chunks.append({"text": text, "pages": []})
             text = f"{file.stem} - {sheet_name}:"
 
         text += f"\n{lines[header_row - 1]}"
@@ -221,7 +214,6 @@ def chunk_excel(file: Path, tokenizer: tiktoken.Encoding, max_len: int = 600) ->
                 chunks.append({
                     "text": f"(SL: {count}, Tổng: {max_row - header_row}) {text}",
                     "pages": [],
-                    "image_paths": [],
                 })
                 text = f"{file.stem} - {sheet_name}:\n{lines[header_row - 1]}"
                 count = 0
@@ -231,21 +223,9 @@ def chunk_excel(file: Path, tokenizer: tiktoken.Encoding, max_len: int = 600) ->
         chunks.append({
             "text": f"(SL: {count}, Tổng: {max_row - header_row}) {text}",
             "pages": [],
-            "image_paths": [],
         })
 
     return chunks
-
-
-def _extract_tables_for_source(original_path: Path, parsed_path: Path, tables_dir: Path) -> list[dict]:
-    try:
-        if original_path.suffix.lower() == ".docx":
-            return extract_all_tables(original_path, tables_dir)
-        if parsed_path.suffix.lower() == ".pdf":
-            return extract_all_tables(parsed_path, tables_dir)
-    except Exception as e:
-        log.warning("Extract tables failed: %s", e)
-    return []
 
 
 def run(model: str, src: Union[str, Path], overwrite: bool = True, to_console: bool = True) -> List[dict]:
@@ -284,12 +264,7 @@ def run(model: str, src: Union[str, Path], overwrite: bool = True, to_console: b
             else:
                 parsed_path = local_path
 
-        tables_dir = project_root() / "samples" / "table_images" / local_path.stem
-        table_items = _extract_tables_for_source(local_path, parsed_path, tables_dir)
-
         data = chunk_by_title(parsed_path)
-        data = attach_table_images_to_tree(data, table_items)
-
         chunks = chunk_doc(data, model=model)
         return chunks
 

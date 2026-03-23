@@ -1,5 +1,7 @@
 import json
 import logging
+import os
+import re
 
 from partialjson.json_parser import JSONParser
 
@@ -19,6 +21,24 @@ CITATION_TAG = '[CITATION]'
 ERROR_TAG = '[ERROR]'
 DONE_TAG = '[DONE]'
 UUID_TAG = '[UUID]'
+
+
+def _normalize_source_title(title: str) -> str:
+    title = (title or "").strip()
+    if not title:
+        return "Không rõ nguồn"
+
+    title = os.path.basename(title)
+
+    title = re.sub(
+        r"\[(BẢNG|TABLE|CONTEXT)\s*\d+\]",
+        "",
+        title,
+        flags=re.IGNORECASE
+    ).strip()
+
+    title = re.sub(r"\s+", " ", title).strip(" -–—:,")
+    return title or "Không rõ nguồn"
 
 
 class LLMResponseProcessor:
@@ -106,34 +126,37 @@ class LLMResponseProcessor:
                         if i not in refs:
                             continue
 
-                        media_refs += chunk.media_refs if chunk.media_refs and len(chunk.media_refs) else []
+                        if chunk.media_refs and len(chunk.media_refs):
+                            media_refs += chunk.media_refs
+
                         document_id = chunk.document_id
+                        normalized_title = _normalize_source_title(document_title)
+
                         if document_id not in citations:
                             citations[document_id] = {
                                 "id": document_id,
-                                "title": document_title,
-                                "pages": set(),
+                                "title": normalized_title,
                             }
-
-                        if chunk.pages:
-                            citations[document_id]["pages"].update(
-                                int(p) for p in chunk.pages if str(p).strip().isdigit()
-                            )
 
                     if len(media_refs):
                         yield f"\n{REFS_TAG}{json.dumps(media_refs, ensure_ascii=False)}"
 
                 final_citations = []
+                seen_titles = set()
+
                 for doc in citations.values():
+                    title = _normalize_source_title(doc["title"])
+                    if not title or title in seen_titles:
+                        continue
+
+                    seen_titles.add(title)
                     final_citations.append({
                         "id": doc["id"],
-                        "title": doc["title"],
-                        "pages": sorted(list(doc["pages"])),
+                        "title": title,
                     })
+
                 yield CITATION_TAG + json.dumps(final_citations, ensure_ascii=False)
 
-                # FIX: dùng chunk.point_id (str Qdrant ID) thay vì c.id (UUID của Qdrant point, không phải DB chunk id)
-                # scores lưu [point_id, score] để sau đó map về chunk DB trong save_data task
                 scores = [
                     [str(c.id), c.score if (order in refs) else 0]
                     for order, c in enumerate(contexts, start=1)
