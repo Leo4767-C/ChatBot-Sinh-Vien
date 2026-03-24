@@ -1,11 +1,67 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:#252d3d;border-radius:100px}
-::-webkit-scrollbar-thumb:hover{background:#34d399}
-::selection{background:rgba(110,231,183,0.2);color:#e8eaf0}
-html{scroll-behavior:smooth}
-body{background:#0f1117}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.animate-fade-up{animation:fadeUp .3s ease forwards}
+
+/* Tùy chỉnh thanh cuộn (Scrollbar) cho giao diện sáng */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* Màu xám nhạt (slate-300) */
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* Tối hơn một chút khi di chuột qua (slate-400) */
+}
+
+/* Tùy chỉnh màu khi bôi đen văn bản (Selection) */
+::selection {
+  background: rgba(59, 130, 246, 0.2); /* Nền xanh dương nhạt (blue-500 / 20%) */
+  color: #0f172a; /* Chữ màu đậm (slate-900) để dễ đọc */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Đặt nền mặc định là màu sáng (sky-50) và chữ màu xám đậm (slate-800) */
+body {
+  background-color: #f0f9ff; 
+  color: #1e293b; 
+}
+
+/* --- Các hiệu ứng Animation --- */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fadeUp 0.3s ease forwards;
+}
+
+/* Hiệu ứng xuất hiện mượt mà cho màn hình chào mừng */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}

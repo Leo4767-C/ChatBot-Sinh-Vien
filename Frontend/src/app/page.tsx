@@ -1,307 +1,236 @@
-"use client";
-import { useState, useEffect, useRef, useCallback, useTransition } from "react";
-import { ChatSession } from "@/lib/types";
-import { createSession, getSessions, getHistory, deleteSession } from "@/lib/api";
-import { useChat } from "@/hooks/useChat";
-import MessageBubble from "@/components/chat/MessageBubble";
-import ChatInput from "@/components/chat/ChatInput";
-import {
-  Plus, Trash2, MessageSquare, Sparkles, Loader2, BookOpen, Image as ImageIcon
-} from "lucide-react";
-import clsx from "clsx";
+'use client';
 
+import React, { useRef, useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useChat } from '@/hooks/useChat';
+import MessageBubble from '@/components/chat/MessageBubble';
+import ChatInput from '@/components/chat/ChatInput';
+import { Plus, MessageSquare, Menu, X, Clock, ChevronRight, Loader2, PanelLeft } from 'lucide-react';
+
+// ĐÃ CẬP NHẬT LẠI DANH SÁCH GỢI Ý
 const SUGGESTIONS = [
-  "Học phí trường là bao nhiêu?",
-  "Điều kiện tốt nghiệp gồm những gì?",
-  "Điểm chuẩn của trường là bao nhiêu ?",
-  "Quy chế về điểm rèn luyện là như thế nào ?",
-  "Quy định về học bổng trường là gì ?",
+  "Quy chế thi lại, học lại như thế nào?",
+  "Điều kiện để được xét học bổng khuyến khích học tập?",
+  "Chuẩn đầu ra Tiếng Anh quy định như thế nào?",
+  "Hướng dẫn cách kết nối Wifi của trường?"
 ];
 
-export default function App() {
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [sid, setSid] = useState<string | null>(null);
-  const [sidebarOpen, setSidebar] = useState(true);
-  const [initLoading, setInit] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const sidRef = useRef<string | null>(null);
-  const [, startTransition] = useTransition();
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-  const { messages, loading, error, send, sendImage, load, clear } = useChat(sid || "");
-
-  useEffect(() => {
-    sidRef.current = sid;
-  }, [sid]);
+export default function Home() {
+  const [sessionId, setSessionId] = useState(""); 
+  const { messages, send, sendImage, loading, clear, load } = useChat(sessionId);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
+  
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    getSessions()
-      .then((s) => setSessions(s))
-      .catch(() => {})
-      .finally(() => setInit(false));
+    handleNewChat(); 
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > 0 && messages.length <= 2 && !loading) {
+      fetchSessions();
+    }
+  }, [messages.length, loading]);
+
+  const fetchSessions = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/sessions/`);
+      if (res.ok) {
+        const data = await res.json();
+        setChatHistory(data);
+      }
+    } catch (error) {
+      console.error("Không thể kết nối đến Backend để lấy lịch sử:", error);
+    }
+  };
+
+  const handleNewChat = async () => {
+    clear(); 
+    setIsMobileSidebarOpen(false);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/sessions/`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setSessionId(data.id); 
+      }
+    } catch (error) {
+      console.error("Lỗi tạo session:", error);
+      setSessionId("session-" + Math.random().toString(36).substring(7));
+    }
+    
+    fetchSessions();
+  };
+
+  const handleSelectHistory = async (id: string) => {
+    setIsMobileSidebarOpen(false); 
+    if (id === sessionId) return;
+
+    setIsLoadingHistory(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/sessions/${id}/history`);
+      if (res.ok) {
+        const pastMessages = await res.json();
+        setSessionId(id);
+        load(pastMessages); 
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy tin nhắn:", error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const handleSuggestionClick = (text: string) => {
+    send(text);
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const refreshSessions = useCallback(() => {
-    startTransition(() => {
-      getSessions().then(setSessions).catch(() => {});
-    });
-  }, []);
-
-  const newSession = useCallback(async () => {
-    const s = await createSession();
-    setSessions((p) => [s, ...p]);
-    setSid(s.id);
-    sidRef.current = s.id;
-    clear();
-  }, [clear]);
-
-  const selectSession = useCallback(async (s: ChatSession) => {
-    setSid(s.id);
-    sidRef.current = s.id;
-    clear();
-    const h = await getHistory(s.id).catch(() => []);
-    load(h);
-  }, [clear, load]);
-
-  const delSession = useCallback(async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    await deleteSession(id);
-    setSessions((p) => p.filter((s) => s.id !== id));
-    if (sidRef.current === id) {
-      setSid(null);
-      sidRef.current = null;
-      clear();
-    }
-  }, [clear]);
-
-  const ensureSession = useCallback(async () => {
-    let id = sidRef.current;
-
-    if (!id) {
-      const s = await createSession();
-      setSessions((p) => [s, ...p]);
-      setSid(s.id);
-      sidRef.current = s.id;
-      id = s.id;
-    }
-
-    return id;
-  }, []);
-
-  const handleSend = useCallback(async (text: string) => {
-    await ensureSession();
-    await send(text);
-    refreshSessions();
-  }, [ensureSession, send, refreshSessions]);
-
-  const handleSendImage = useCallback(async (file: File, prompt?: string) => {
-    await ensureSession();
-    await sendImage(file, prompt);
-    refreshSessions();
-  }, [ensureSession, sendImage, refreshSessions]);
-
   return (
-    <div className="flex h-screen bg-surface-DEFAULT overflow-hidden">
-      {/* Sidebar */}
-      <aside
-        className={clsx(
-          "flex flex-col border-r border-surface-3 bg-surface-1 transition-all duration-300 flex-shrink-0",
-          sidebarOpen ? "w-64" : "w-0 overflow-hidden"
-        )}
+    <div className="flex h-screen bg-sky-50/50 font-sans text-slate-800 overflow-hidden">
+      
+      {isMobileSidebarOpen && (
+        <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-20 lg:hidden" onClick={() => setIsMobileSidebarOpen(false)} />
+      )}
+
+      <aside 
+        className={`fixed lg:static inset-y-0 left-0 z-30 bg-white flex flex-col shadow-2xl lg:shadow-none transition-all duration-300 ease-in-out overflow-hidden
+        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} 
+        ${isDesktopSidebarOpen ? 'w-72' : 'w-72 lg:w-0'}`}
       >
-        <div className="flex items-center gap-2.5 px-4 py-4 border-b border-surface-3">
-          <div className="w-7 h-7 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 text-accent" />
+        <div className="w-72 h-full flex flex-col border-r border-slate-200">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <button onClick={handleNewChat} className="flex-1 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors shadow-sm shadow-blue-200">
+              <Plus className="w-5 h-5" />
+              <span>Đoạn chat mới</span>
+            </button>
+            <button onClick={() => setIsMobileSidebarOpen(false)} className="lg:hidden ml-2 p-2 text-slate-400 hover:text-slate-600">
+              <X className="w-6 h-6" />
+            </button>
           </div>
-          <div>
-            <p className="text-sm font-bold text-text-primary">ChatBot</p>
-            <p className="text-xs text-text-muted">RAG · Voice · Hình ảnh</p>
-          </div>
-        </div>
 
-        <div className="flex gap-1.5 px-3 py-2">
-          <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-surface-3 text-text-secondary">
-            <span style={{ fontSize: 10 }}>🎤</span> Voice
-          </span>
-          <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-surface-3 text-text-secondary">
-            <ImageIcon className="w-2.5 h-2.5" /> Ảnh
-          </span>
-          <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-surface-3 text-text-secondary">
-            <BookOpen className="w-2.5 h-2.5" /> RAG
-          </span>
-        </div>
-
-        <div className="px-3 pb-2">
-          <button
-            onClick={newSession}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm bg-accent/10 border border-accent/20 text-accent hover:bg-accent/20 transition-colors"
-          >
-            <Plus className="w-4 h-4" /> Cuộc trò chuyện mới
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-2 space-y-0.5 py-1">
-          {initLoading ? (
-            <div className="flex justify-center py-6">
-              <Loader2 className="w-4 h-4 text-accent animate-spin" />
-            </div>
-          ) : sessions.length === 0 ? (
-            <p className="text-xs text-text-muted text-center py-6 px-4">
-              Chưa có cuộc trò chuyện nào
+          <div className="flex-1 overflow-y-auto p-3 space-y-1">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 pt-2 pb-2 flex items-center justify-between">
+              <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Gần đây</span>
             </p>
-          ) : (
-            sessions.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => selectSession(s)}
-                className={clsx(
-                  "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left text-xs transition-colors group",
-                  s.id === sid
-                    ? "bg-accent/10 text-accent"
-                    : "text-text-secondary hover:bg-surface-2 hover:text-text-primary"
-                )}
-              >
-                <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="flex-1 truncate">{s.title}</span>
-                <button
-                  onClick={(e) => delSession(s.id, e)}
-                  className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all p-0.5 rounded"
+            
+            {chatHistory.length === 0 ? (
+              <p className="text-xs text-center text-slate-400 mt-4 italic">Chưa có lịch sử</p>
+            ) : (
+              chatHistory.map((chat) => (
+                <button 
+                  key={chat.id} 
+                  onClick={() => handleSelectHistory(chat.id)}
+                  className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group ${sessionId === chat.id ? 'bg-blue-50 text-blue-700 font-semibold' : 'hover:bg-sky-50 text-slate-600 hover:text-blue-700'}`}
                 >
-                  <Trash2 className="w-3 h-3" />
+                  <MessageSquare className={`w-4 h-4 ${sessionId === chat.id ? 'text-blue-600' : 'opacity-50 group-hover:opacity-100 group-hover:text-blue-600'}`} />
+                  <span className="text-sm truncate flex-1">{chat.title || "Trò chuyện mới"}</span>
                 </button>
-              </button>
-            ))
-          )}
+              ))
+            )}
+          </div>
+          
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">SV</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-700 truncate">Sinh viên TLU</p>
+              </div>
+            </div>
+          </div>
         </div>
-
-        
       </aside>
 
-      {/* Main */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="flex items-center gap-3 px-4 py-3 border-b border-surface-3 bg-surface-1/60 backdrop-blur-sm flex-shrink-0">
-          <button
-            onClick={() => setSidebar((p) => !p)}
-            className="text-text-muted hover:text-text-primary transition-colors p-1 rounded-lg hover:bg-surface-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-          <div className="flex-1">
-            <h1 className="text-sm font-semibold text-text-primary">
-              Trợ lý nghiên cứu khoa học AI
-            </h1>
-            <p className="text-xs text-text-muted">
-              Hỏi bằng văn bản, giọng nói hoặc gửi ảnh để phân tích
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <span className="text-xs text-text-secondary hidden sm:block">Gemini 2.5</span>
+      <div className="flex-1 flex flex-col min-w-0 relative">
+        <header className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-white/80 backdrop-blur-md shadow-sm border-b border-slate-100 z-10 sticky top-0">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-slate-500 hover:text-blue-600 hover:bg-sky-50 rounded-lg transition-colors">
+              <Menu className="w-6 h-6" />
+            </button>
+            <button 
+              onClick={() => setIsDesktopSidebarOpen(!isDesktopSidebarOpen)} 
+              className="hidden lg:block p-2 -ml-2 text-slate-500 hover:text-blue-600 hover:bg-sky-50 rounded-lg transition-colors"
+              title={isDesktopSidebarOpen ? "Đóng thanh bên" : "Mở thanh bên"}
+            >
+              <PanelLeft className="w-6 h-6" />
+            </button>
+            <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0 bg-sky-100 rounded-full p-1.5 shadow-inner">
+              <Image src="/logo-tlu.png" alt="Logo Đại học Thủy Lợi" fill className="object-contain" priority />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-lg md:text-xl font-extrabold text-blue-700 leading-tight tracking-tight">
+                Chatbot hỗ trợ sinh viên
+              </h1>
+            </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6" style={{ scrollbarWidth: "thin" }}>
-          <div className="max-w-2xl mx-auto space-y-6">
-            {messages.length === 0 && !loading && (
-              <Welcome onSuggest={handleSend} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:px-24 xl:px-48 scroll-smooth">
+          <div className="flex flex-col gap-6 pb-6 max-w-4xl mx-auto">
+            {isLoadingHistory ? (
+              <div className="flex flex-col items-center justify-center h-full mt-32 text-slate-400">
+                <Loader2 className="w-8 h-8 animate-spin mb-4 text-blue-500" />
+                <p>Đang tải cuộc trò chuyện...</p>
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full mt-10 md:mt-20 text-center animate-fade-in bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-slate-100">
+                <div className="w-20 h-20 mb-6 relative opacity-90 p-3 bg-sky-50 rounded-full">
+                   <Image src="/logo-tlu.png" alt="TLU Logo" fill className="object-contain" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3 tracking-tight">Xin chào, sinh viên TLU!</h2>
+                <p className="text-slate-500 max-w-lg leading-relaxed text-sm md:text-base mb-8">
+                  Hôm nay bạn cần hỗ trợ gì về quy chế, điểm chuẩn, hay các thông tin học vụ? Hãy chọn một câu hỏi mẫu hoặc nhập câu hỏi của bạn bên dưới nhé.
+                </p>
+                <div className="w-full max-w-2xl text-left">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    Gợi ý câu hỏi <ChevronRight className="w-4 h-4" />
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {SUGGESTIONS.map((text, idx) => (
+                      <button key={idx} onClick={() => handleSuggestionClick(text)} className="text-left bg-sky-50/50 hover:bg-sky-100 border border-sky-100 hover:border-blue-200 text-blue-800 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200 hover:shadow-sm group flex items-start gap-2">
+                        <MessageSquare className="w-4 h-4 mt-0.5 text-blue-400 group-hover:text-blue-600 flex-shrink-0" />
+                        <span>{text}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              messages.map((msg, index) => (
+                <div key={index} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <MessageBubble msg={msg} />
+                </div>
+              ))
             )}
-
-            {messages.map((m, i) => (
-              <MessageBubble key={i} msg={m} />
-            ))}
-
-            {loading && messages[messages.length - 1]?.role !== "model" && (
-              <Typing />
-            )}
-
-            {error && (
-              <div className="p-4 bg-red-950/30 border border-red-800/40 rounded-2xl text-sm text-red-300">
-                {error}
+            {loading && (
+              <div className="flex items-center gap-3 text-blue-600 text-sm ml-2 md:ml-12 mt-2 bg-white px-5 py-3 w-max rounded-3xl shadow-sm border border-slate-100">
+                <div className="flex gap-1.5">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+                <span className="font-medium animate-pulse">Đang suy nghĩ...</span>
               </div>
             )}
-
-            <div ref={bottomRef} />
+            <div ref={messagesEndRef} />
           </div>
-        </div>
+        </main>
 
-        <div className="border-t border-surface-3 bg-surface-1/80 px-4 py-3 flex-shrink-0">
-          <div className="max-w-2xl mx-auto">
-            <ChatInput
-              onSend={handleSend}
-              onSendImage={handleSendImage}
-              loading={loading}
-              hasDocs={true}
-            />
+        <footer className="bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 md:p-5">
+          <div className="max-w-4xl mx-auto">
+            <ChatInput onSend={send} onSendImage={sendImage} loading={loading} hasDocs={true} />
           </div>
-        </div>
-      </main>
-    </div>
-  );
-}
+        </footer>
 
-function Typing() {
-  return (
-    <div className="flex gap-3">
-      <div className="w-8 h-8 rounded-full bg-surface-2 border border-surface-3 flex items-center justify-center text-base">
-        🤖
-      </div>
-      <div className="bg-surface-1 border border-surface-3 rounded-2xl rounded-tl-sm px-4 py-3">
-        <div className="flex gap-1.5 items-center">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="w-2 h-2 rounded-full bg-accent animate-pulse"
-              style={{ animationDelay: `${i * 0.16}s` }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Welcome({ onSuggest }: { onSuggest: (q: string) => void }) {
-  return (
-    <div className="flex flex-col items-center py-10 gap-6 animate-fade-up">
-      <div className="relative">
-        <div className="w-16 h-16 rounded-2xl bg-accent/10 border-2 border-accent/30 flex items-center justify-center text-3xl">
-          🎓
-        </div>
-        <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-accent flex items-center justify-center">
-          <Sparkles className="w-3 h-3 text-surface-DEFAULT" />
-        </div>
-      </div>
-
-      <div className="text-center space-y-2">
-        <h2 className="text-xl font-bold text-text-primary">Xin chào, Nhà nghiên cứu!</h2>
-        <p className="text-text-secondary text-sm max-w-sm leading-relaxed">
-          Hỏi bằng <span className="text-accent font-medium">văn bản</span>,{" "}
-          <span className="text-accent font-medium">🎤 giọng nói</span> hoặc{" "}
-          <span className="text-accent font-medium">gửi ảnh</span>.
-        </p>
-      </div>
-
-      <div className="w-full max-w-md space-y-2">
-        <p className="text-xs text-text-muted text-center mb-1">Gợi ý câu hỏi</p>
-        {SUGGESTIONS.map((q, i) => (
-          <button
-            key={i}
-            onClick={() => onSuggest(q)}
-            className="w-full text-left px-4 py-2.5 rounded-xl text-sm bg-surface-1 border border-surface-3 text-text-secondary hover:border-accent/40 hover:text-text-primary transition-all"
-          >
-            {q}
-          </button>
-        ))}
       </div>
     </div>
   );

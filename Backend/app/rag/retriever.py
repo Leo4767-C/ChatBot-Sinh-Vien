@@ -28,7 +28,11 @@ class Retriever:
         logger.info("Embedding query for retrieval...")
 
         try:
-            dense_, sparse_, _ = embedder.get_embeddings([query])
+            # FIX: Chạy tác vụ sinh embedding đồng bộ trên một luồng (thread) riêng 
+            # để không làm block event loop của FastAPI
+            loop = asyncio.get_running_loop()
+            result = await loop.run_in_executor(None, embedder.get_embeddings, [query])
+            dense_, sparse_, _ = result
         except Exception as e:
             logger.exception("Embedding failed: %s", e)
             return []
