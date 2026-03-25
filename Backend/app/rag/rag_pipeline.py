@@ -2,16 +2,16 @@ from datetime import datetime, timezone
 import logging
 import time
 import uuid
+from typing import List, Sequence
+
+from qdrant_client import QdrantClient, AsyncQdrantClient
 
 from app.core.database import SessionLocal
 from app.llm.llm_service import llm_client
 from app.rag.llm_response_processor import LLMResponseProcessor
 from app.rag.retriever import Retriever
-from typing import List, Sequence
 from app.core.config import settings
 from app.schemas.enums import ModelType
-
-from qdrant_client import QdrantClient, AsyncQdrantClient
 from app.worker.tasks import save_data
 
 logger = logging.getLogger(__name__)
@@ -46,41 +46,16 @@ class RAGPipeline:
         for chunk in retrieved_chunks[:4]:
             payload = chunk.payload or {}
             text = (payload.get("content") or "").strip()
-
             if not text:
                 continue
-
             contexts.append(text)
 
         final_context = "\n\n---\n\n".join(contexts)
-
         question_lower = (question or "").lower().strip()
 
         is_need_yes_no_question = (
             question_lower.startswith("có cần")
             or "có cần" in question_lower
-        )
-
-        is_regulation_like = any(
-            kw in question_lower
-            for kw in [
-                "quy chế",
-                "quy định",
-                "chuẩn đầu ra",
-                "tốt nghiệp",
-                "điều kiện",
-                "thủ tục",
-                "điểm rèn luyện",
-                "học phí",
-                "chứng chỉ",
-                "công nghệ thông tin",
-                "cntt",
-                "miễn thi",
-                "là như thế nào",
-                "gồm những gì",
-                "bao gồm những gì",
-                "có cần",
-            ]
         )
 
         if is_need_yes_no_question:
@@ -101,30 +76,11 @@ class RAGPipeline:
                 "KHÔNG chèn ký hiệu tham chiếu như [BẢNG 1], [CONTEXT 2], [1], [2]."
             )
             max_tokens = min(settings.MAX_OUTPUT_TOKENS, 220)
-
-        elif is_regulation_like:
-            answer_style = (
-                "Đây là câu hỏi về quy định, chuẩn đầu ra hoặc điều kiện. "
-                "Hãy trả lời ngắn gọn, rõ ràng, dễ đọc. "
-                "Trình bày theo bullet hoặc mục ngắn. "
-                "KHÔNG dùng bảng Markdown. "
-                "KHÔNG trình bày theo kiểu 'A — B'. "
-                "KHÔNG dùng HTML như <br>. "
-                "KHÔNG nhắc tới [CONTEXT], [BẢNG], [TABLE], tài liệu nội bộ, hay cách bạn suy luận. "
-                "KHÔNG chèn ký hiệu tham chiếu như [BẢNG 1], [CONTEXT 2], [1], [2]. "
-                "KHÔNG lặp lại ý đã nói bằng cách diễn đạt khác. "
-                "Nếu đã nêu 'có các cách sau' thì bắt buộc phải liệt kê đầy đủ ngay bên dưới. "
-                "Không được kết thúc câu trả lời bằng một câu mở dang dở. "
-                "Nếu có nhiều cách hoặc nhiều điều kiện, hãy liệt kê thành bullet riêng từng ý. "
-                "Mỗi bullet chỉ gồm 1 ý chính và tối đa 1 dòng giải thích ngắn. "
-                "Không viết lại phần đối tượng áp dụng ở đoạn sau nếu đã nêu ở trên."
-            )
-            max_tokens = min(settings.MAX_OUTPUT_TOKENS, 500)
-
         else:
             answer_style = (
                 "Trả lời rõ ràng, đúng trọng tâm, ưu tiên nội dung có trong context. "
-                "Không dùng bảng Markdown nếu nội dung dài hoặc nhiều chữ. "
+                "Nếu nội dung ngắn, các ý đồng đều và dễ đối chiếu, có thể trình bày bằng bảng Markdown. "
+                "Nếu nội dung dài hoặc mỗi ý không đồng đều, hãy dùng bullet list. "
                 "Không dùng HTML như <br>. "
                 "Không nhắc tới [CONTEXT], [BẢNG], [TABLE], tài liệu nội bộ, hay cách bạn suy luận. "
                 "Không chèn ký hiệu tham chiếu như [BẢNG 1], [CONTEXT 2], [1], [2]. "
@@ -141,13 +97,13 @@ class RAGPipeline:
             f"1. Nếu câu trả lời có trong NGỮ CẢNH, hãy ưu tiên sử dụng thông tin đó.\n"
             f"2. Nếu không có trong NGỮ CẢNH, hãy dùng kiến thức chuyên môn của bạn nhưng phải nêu rõ 'Dựa trên kiến thức chung...'.\n"
             f"3. Sử dụng tiếng Việt rõ ràng, dễ đọc.\n"
-            f"4. Không dùng bảng Markdown cho nội dung dài, quy chế, quy định, thủ tục, chuẩn đầu ra, điều kiện tốt nghiệp.\n"
-            f"5. Không dùng HTML như <br>.\n"
-            f"6. Không trình bày theo kiểu hai cột hoặc 'A — B'.\n"
-            f"7. Không nhắc đến [CONTEXT], [BẢNG], [TABLE], tài liệu nội bộ, hay cách bạn suy luận.\n"
-            f"8. Không được chèn ký hiệu tham chiếu như [BẢNG 1], [CONTEXT 2], [1], [2] vào nội dung trả lời.\n"
-            f"9. Nếu có nhiều ý, hãy dùng bullet list ngắn gọn, trừ khi câu hỏi là dạng Có/Không.\n"
-            f"10. Nếu có nhiều điều kiện hoặc nhiều cách thức, mỗi điều kiện phải là một bullet riêng, trừ khi câu hỏi là dạng Có/Không.\n"
+            f"4. Có thể dùng bảng Markdown nếu nội dung ngắn, các dòng/ý đồng đều và dễ đối chiếu.\n"
+            f"5. Không dùng bảng Markdown nếu nội dung dài hoặc có nhiều câu giải thích trong một ý.\n"
+            f"6. Không dùng HTML như <br>.\n"
+            f"7. Không trình bày theo kiểu hai cột hoặc 'A — B' nếu không phải bảng Markdown chuẩn.\n"
+            f"8. Không nhắc đến [CONTEXT], [BẢNG], [TABLE], tài liệu nội bộ, hay cách bạn suy luận.\n"
+            f"9. Không được chèn ký hiệu tham chiếu như [BẢNG 1], [CONTEXT 2], [1], [2] vào nội dung trả lời.\n"
+            f"10. Nếu có nhiều ý, hãy dùng bullet list ngắn gọn khi không phù hợp để lập bảng.\n"
             f"11. Nếu một bullet cần giải thích thêm, thêm 1 dòng con bắt đầu bằng '- '.\n"
             f"12. Không lặp lại nội dung đã nói ở trên.\n"
             f"13. Nếu người dùng hỏi rộng, hãy tóm tắt trước thay vì trích lại toàn bộ tài liệu.\n"

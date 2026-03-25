@@ -1,8 +1,10 @@
 """
 Chat router — RAG + Gemini streaming + hỗ trợ ảnh người dùng upload.
 - Không hiểu nhầm "tiếng Anh" thành "ảnh"
-- Ưu tiên trả bảng Markdown khi câu hỏi đụng nội dung bảng
-- Không tự stream ảnh bảng trong luồng hỏi đáp text
+- Tự ưu tiên bảng Markdown khi nội dung ngắn, đều cấu trúc
+- Tự tránh bảng Markdown bị vỡ với nội dung dài
+- Hỗ trợ follow-up kiểu "ý số 1", "mục trên", "cái đó"
+- Đọc stream Gemini an toàn, tránh lỗi response.text quick accessor
 """
 import json
 import logging
@@ -44,7 +46,9 @@ SYSTEM_INSTRUCTION = """Bạn là StudyBot — trợ lý nghiên cứu khoa họ
 
 Quy tắc:
 - Ưu tiên thông tin từ [CONTEXT] nếu có.
-- Khi thông tin phù hợp với dạng bảng, ưu tiên trả lời bằng bảng Markdown thay vì mô tả dài dòng.
+- Chỉ dùng bảng Markdown khi nội dung ngắn, rõ cột, dễ đối chiếu.
+- Nếu nội dung dài, nhiều điều kiện, nhiều giải thích, hãy dùng bullet list.
+- Không nhét cả đoạn văn dài vào một ô của bảng.
 - Không bao giờ in ra đường dẫn ảnh, tên file ảnh, hoặc URL nội bộ như /images/...
 - Nếu người dùng gửi ảnh tài liệu hoặc ảnh có chữ:
   - ưu tiên đọc phần chữ và nội dung văn bản
@@ -96,11 +100,34 @@ def _normalize_text(text: str) -> str:
     return text
 
 
+def _safe_chunk_text(chunk) -> str:
+    """
+    Đọc text từ Gemini stream an toàn.
+    Tránh gọi chunk.text trực tiếp khi chunk không có valid Part.
+    """
+    try:
+        candidates = getattr(chunk, "candidates", None) or []
+        texts: list[str] = []
+
+        for cand in candidates:
+            content = getattr(cand, "content", None)
+            parts = getattr(content, "parts", None) or []
+            for part in parts:
+                txt = getattr(part, "text", None)
+                if txt:
+                    texts.append(txt)
+
+        if texts:
+            return "".join(texts)
+
+        # fallback cuối cùng
+        txt = getattr(chunk, "text", None)
+        return txt or ""
+    except Exception:
+        return ""
+
+
 def _is_image_followup(question: str) -> bool:
-    """
-    Chỉ dùng cho luồng hỏi tiếp về ảnh user đã upload.
-    Không dùng từ đơn 'anh' để tránh nhầm với 'tiếng Anh'.
-    """
     q = _normalize_text(question)
     phrases = [
         "xem anh",
@@ -142,28 +169,464 @@ def _is_text_focused_image_request(question: str) -> bool:
 
 def _wants_table_answer(question: str) -> bool:
     q = _normalize_text(question)
-    phrases = [
-        "cac ",
-        "danh sach",
-        "bao gom",
-        "gom nhung gi",
-        "duoc cong nhan",
+    positive_phrases = [
+        "diem chuan",
+        "hoc phi",
+        "chung chi",
         "tuong duong",
         "tham chieu",
         "muc diem",
+        "thang diem",
+        "quy doi",
+        "xep loai",
+        "danh sach",
+        "bao gom",
+        "gom nhung gi",
         "cac muc",
-        "co so",
-        "to chuc",
-        "chung chi",
-        "hoc phi",
-        "diem chuan",
-        "quy dinh",
+        "cac nhom",
+        "cac bac",
+        "cac to chuc",
+        "cac co so",
+        "doi chieu",
+        "so sanh",
+        "cac nganh",
+        "khoa kinh te",
+        "khoa cong nghe thong tin",
+        "cntt",
         "bang",
         "in ra bang",
         "dang bang",
         "trinh bay dang bang",
     ]
-    return any(p in q for p in phrases)
+    return any(p in q for p in positive_phrases)
+
+
+def _strip_md_prefix(line: str) -> str:
+    line = (line or "").strip()
+    line = re.sub(r"^\s*[-*•]+\s*", "", line)
+    line = re.sub(r"^\s*\d+[.)]\s*", "", line)
+    return line.strip()
+
+
+def _extract_short_lines(text: str) -> list[str]:
+    lines: list[str] = []
+    for raw in (text or "").splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+
+        if line.startswith("|"):
+            return []
+
+        if line.startswith("#"):
+            continue
+
+        lower = line.lower().strip()
+        if re.match(r"^(dưới đây|sau đây|gồm|bao gồm|cụ thể|ví dụ)\b", lower):
+            continue
+
+        cleaned = _strip_md_prefix(line)
+        if cleaned:
+            lines.append(cleaned)
+
+    return lines
+
+
+def _looks_like_already_table(text: str) -> bool:
+    lines = [ln.rstrip() for ln in (text or "").splitlines()]
+    for i in range(len(lines) - 1):
+        first = lines[i].strip()
+        second = lines[i + 1].strip()
+        if first.startswith("|") and second.startswith("|"):
+            sep = second.replace(" ", "")
+            if re.fullmatch(r"\|?[:\-|]+\|?", sep):
+                return True
+    return False
+
+
+def _parse_key_value_line(line: str) -> tuple[str, str] | None:
+    line = _strip_md_prefix(line)
+
+    for sep in [":", " - ", " – ", " — "]:
+        if sep in line:
+            left, right = line.split(sep, 1)
+            left = left.strip(" -*•\t")
+            right = right.strip(" -*•\t")
+            if left and right:
+                return left, right
+
+    return None
+
+
+def _looks_like_short_uniform_lines(lines: list[str]) -> bool:
+    if not lines:
+        return False
+
+    if len(lines) < 3 or len(lines) > 10:
+        return False
+
+    if any(len(line) > 160 for line in lines):
+        return False
+
+    kv_count = sum(1 for x in lines if _parse_key_value_line(x) is not None)
+    title_count = sum(
+        1 for x in lines
+        if re.match(r"^(ngành|chương trình|khoa)\b", x.lower())
+    )
+
+    if title_count >= 2 and kv_count >= 4:
+        return True
+
+    colon_lines = sum(1 for x in lines if ":" in x)
+    dash_lines = sum(1 for x in lines if " - " in x or " – " in x or " — " in x)
+
+    score = 0
+    if colon_lines >= max(2, len(lines) // 2):
+        score += 1
+    if dash_lines >= max(2, len(lines) // 2):
+        score += 1
+
+    word_counts = [len(x.split()) for x in lines]
+    if word_counts and (max(word_counts) - min(word_counts) <= 14):
+        score += 1
+
+    return score >= 2
+
+
+def _to_table_from_pairs(lines: list[str], default_left="Mục", default_right="Chi tiết") -> str | None:
+    pairs: list[tuple[str, str]] = []
+    for line in lines:
+        parsed = _parse_key_value_line(line)
+        if not parsed:
+            return None
+        pairs.append(parsed)
+
+    if len(pairs) < 2:
+        return None
+
+    if any(len(left) > 60 or len(right) > 120 for left, right in pairs):
+        return None
+
+    out = [f"| {default_left} | {default_right} |", "|---|---|"]
+    for left, right in pairs:
+        out.append(f"| {left} | {right} |")
+    return "\n".join(out)
+
+
+def _to_table_from_grouped_blocks(lines: list[str]) -> str | None:
+    groups: list[dict] = []
+    current_title: str | None = None
+    current_details: list[tuple[str, str]] = []
+
+    def flush():
+        nonlocal current_title, current_details
+        if current_title and current_details:
+            groups.append({
+                "title": current_title,
+                "details": current_details[:],
+            })
+        current_title = None
+        current_details = []
+
+    for line in lines:
+        parsed = _parse_key_value_line(line)
+
+        if parsed is None:
+            maybe_title = _strip_md_prefix(line)
+            if re.match(r"^(ngành|chương trình|khoa)\b", maybe_title.lower()):
+                flush()
+                current_title = maybe_title
+            else:
+                return None
+            continue
+
+        left, right = parsed
+
+        if not current_title:
+            return None
+
+        current_details.append((left.strip(), right.strip()))
+
+    flush()
+
+    if len(groups) < 2 or len(groups) > 10:
+        return None
+
+    key_sets = [tuple(k for k, _ in g["details"]) for g in groups]
+    first_keys = key_sets[0]
+
+    if not first_keys:
+        return None
+
+    if not all(keys == first_keys for keys in key_sets):
+        return None
+
+    headers = ["Tên"] + list(first_keys)
+    out = [
+        "| " + " | ".join(headers) + " |",
+        "|" + "|".join(["---"] * len(headers)) + "|",
+    ]
+
+    for g in groups:
+        detail_map = {k: v for k, v in g["details"]}
+        row = [g["title"]] + [detail_map.get(k, "") for k in first_keys]
+
+        if any(len(cell) > 120 for cell in row):
+            return None
+
+        out.append("| " + " | ".join(row) + " |")
+
+    return "\n".join(out)
+
+
+def _auto_convert_short_answer_to_table(text: str, question: str) -> str:
+    if not text:
+        return text
+
+    if _looks_like_already_table(text):
+        return text
+
+    lines = _extract_short_lines(text)
+
+    if not _looks_like_short_uniform_lines(lines):
+        return text
+
+    grouped_table = _to_table_from_grouped_blocks(lines)
+    if grouped_table:
+        return grouped_table
+
+    if _wants_table_answer(question):
+        q = _normalize_text(question)
+        default_left = "Mục"
+        default_right = "Chi tiết"
+
+        if "diem chuan" in q:
+            default_left, default_right = "Ngành/Mục", "Điểm"
+        elif "hoc phi" in q:
+            default_left, default_right = "Mục", "Học phí"
+        elif "chung chi" in q or "tuong duong" in q:
+            default_left, default_right = "Chứng chỉ/Mục", "Chi tiết"
+
+        pair_table = _to_table_from_pairs(
+            lines,
+            default_left=default_left,
+            default_right=default_right,
+        )
+        if pair_table:
+            return pair_table
+
+    return text
+
+
+def _table_block_is_too_wide(block: list[str]) -> bool:
+    if not block:
+        return False
+
+    if any(len((ln or "").strip()) > 220 for ln in block):
+        return True
+
+    if len(block) > 12:
+        return True
+
+    for ln in block[2:]:
+        raw = ln.strip().strip("|")
+        cells = [c.strip() for c in raw.split("|")]
+
+        if len(cells) <= 1:
+            return True
+
+        if any(len(c) > 160 for c in cells):
+            return True
+
+        if sum(1 for c in cells if len(c) > 90) >= 2:
+            return True
+
+    return False
+
+
+def _convert_table_block_to_bullets(block: list[str]) -> str:
+    if len(block) < 3:
+        return "\n".join(block)
+
+    header_line = block[0].strip().strip("|")
+    headers = [h.strip() for h in header_line.split("|") if h.strip()]
+
+    out: list[str] = []
+    for row in block[2:]:
+        raw = row.strip().strip("|")
+        cells = [c.strip() for c in raw.split("|")]
+        cells = [c for c in cells if c]
+
+        if not cells:
+            continue
+
+        if len(headers) >= 2 and len(cells) >= 2:
+            title = cells[0]
+            detail = " | ".join(cells[1:]).strip()
+            if title:
+                out.append(f"- **{title}**")
+                if detail:
+                    out.append(f"  - {detail}")
+        else:
+            out.append(f"- {' | '.join(cells)}")
+
+    return "\n".join(out).strip()
+
+
+def _repair_broken_markdown_tables(text: str) -> str:
+    if not text or not _looks_like_already_table(text):
+        return text
+
+    lines = text.splitlines()
+    out: list[str] = []
+    i = 0
+
+    while i < len(lines):
+        line = lines[i].strip()
+        nxt = lines[i + 1].strip() if i + 1 < len(lines) else ""
+
+        if line.startswith("|") and nxt.startswith("|") and re.fullmatch(r"\|?[:\-|]+\|?", nxt.replace(" ", "")):
+            block = [lines[i], lines[i + 1]]
+            i += 2
+            while i < len(lines) and lines[i].strip().startswith("|"):
+                block.append(lines[i])
+                i += 1
+
+            if _table_block_is_too_wide(block):
+                out.append(_convert_table_block_to_bullets(block))
+            else:
+                out.extend(block)
+            continue
+
+        out.append(lines[i])
+        i += 1
+
+    return "\n".join(out).strip()
+
+
+def _is_reference_followup(question: str) -> bool:
+    q = _normalize_text(question)
+
+    patterns = [
+        r"\by so \d+\b",
+        r"\bmuc so \d+\b",
+        r"\bdong so \d+\b",
+        r"\bkhoan so \d+\b",
+        r"\bdieu so \d+\b",
+        r"\by tren\b",
+        r"\by phia tren\b",
+        r"\bmuc tren\b",
+        r"\bdong tren\b",
+        r"\bcai do\b",
+        r"\bnoi dung do\b",
+        r"\bphan do\b",
+        r"\bdo la gi\b",
+        r"\bgiai thich them\b",
+        r"\bgiai thich ro hon\b",
+    ]
+    return any(re.search(p, q) for p in patterns)
+
+
+def _last_meaningful_model_answer(history: list[dict]) -> str:
+    for msg in reversed(history or []):
+        if msg.get("role") == "model":
+            content = (msg.get("content") or "").strip()
+            if content:
+                return content
+    return ""
+
+
+def _last_meaningful_user_question(history: list[dict]) -> str:
+    for msg in reversed(history or []):
+        if msg.get("role") == "user":
+            content = (msg.get("content") or "").strip()
+            if content:
+                return content
+    return ""
+
+
+def _extract_referenced_item(question: str, previous_answer: str) -> str:
+    q = _normalize_text(question)
+    prev_lines = [ln.strip() for ln in (previous_answer or "").splitlines() if ln.strip()]
+
+    # ý số 1 / mục số 2 ...
+    m = re.search(r"\b(?:y|muc|dong|khoan|dieu)\s+so\s+(\d+)\b", q)
+    if m:
+        idx = int(m.group(1))
+        hits = []
+
+        for ln in prev_lines:
+            cleaned = _strip_md_prefix(ln)
+            mm = re.match(r"^(\d+)[.)]\s*(.+)$", cleaned)
+            if mm:
+                num = int(mm.group(1))
+                text = mm.group(2).strip()
+                hits.append((num, text))
+                continue
+
+            if cleaned.lower().startswith(f"ý {idx}") or cleaned.lower().startswith(f"mục {idx}"):
+                return cleaned
+
+        for num, text in hits:
+            if num == idx:
+                return text
+
+    # ý trên / mục trên
+    if any(x in q for x in ["y tren", "y phia tren", "muc tren", "dong tren", "phan do", "noi dung do", "cai do"]):
+        for ln in prev_lines:
+            cleaned = _strip_md_prefix(ln)
+            if len(cleaned) >= 12:
+                return cleaned
+
+    return ""
+
+
+def _rewrite_followup_question(question: str, history: list[dict]) -> str:
+    if not _is_reference_followup(question):
+        return question
+
+    previous_answer = _last_meaningful_model_answer(history)
+    previous_user = _last_meaningful_user_question(history[:-1] if history else [])
+
+    referenced_item = _extract_referenced_item(question, previous_answer)
+
+    if referenced_item and previous_user:
+        return (
+            f"Trong ngữ cảnh câu hỏi trước: '{previous_user}', "
+            f"hãy giải thích rõ nội dung sau: {referenced_item}"
+        )
+
+    if referenced_item:
+        return f"Hãy giải thích rõ nội dung sau: {referenced_item}"
+
+    if previous_answer and previous_user:
+        snippet = previous_answer.replace("\n", " ").strip()
+        if len(snippet) > 280:
+            snippet = snippet[:280].rstrip() + "..."
+        return (
+            f"Tiếp nối câu hỏi trước: '{previous_user}'. "
+            f"Dựa trên câu trả lời trước: '{snippet}', hãy trả lời câu hỏi này: {question}"
+        )
+
+    return question
+
+
+def _postprocess_answer(text: str, question: str) -> str:
+    text = (text or "").strip()
+    if not text:
+        return text
+
+    text = (
+        text.replace("\r\n", "\n")
+        .replace("<br>", "\n")
+        .replace("<br/>", "\n")
+        .replace("<br />", "\n")
+    )
+
+    text = _auto_convert_short_answer_to_table(text, question)
+    text = _repair_broken_markdown_tables(text)
+    text = re.sub(r"\n{3,}", "\n\n", text).strip()
+    return text
 
 
 def _build_upload_image_prompt(user_prompt: str) -> str:
@@ -257,8 +720,24 @@ async def _vision_answer_for_uploaded_image(*, question: str, image_url: str) ->
 
     prompt = _build_followup_image_prompt(question)
     res = await model.generate_content_async([prompt, img])
-    text = getattr(res, "text", "") or "Mình chưa phân tích được ảnh này."
-    return text.strip()
+
+    try:
+        text = getattr(res, "text", None) or ""
+    except Exception:
+        text = ""
+        candidates = getattr(res, "candidates", None) or []
+        for cand in candidates:
+            content = getattr(cand, "content", None)
+            parts = getattr(content, "parts", None) or []
+            for part in parts:
+                txt = getattr(part, "text", None)
+                if txt:
+                    text += txt
+
+    if not text:
+        text = "Mình chưa phân tích được ảnh này."
+
+    return _postprocess_answer(text.strip(), question)
 
 
 async def _stream_text_answer(
@@ -269,8 +748,10 @@ async def _stream_text_answer(
 ) -> AsyncGenerator[str, None]:
     async with AsyncSessionLocal() as db:
         try:
+            effective_question = _rewrite_followup_question(question, history)
+
             try:
-                chunks = await _retriever.retrieve_v3(question, bot_id=0)
+                chunks = await _retriever.retrieve_v3(effective_question, bot_id=0)
                 if not isinstance(chunks, list):
                     chunks = list(chunks)
             except Exception as e:
@@ -305,24 +786,32 @@ async def _stream_text_answer(
             if ctx_parts:
                 src_str = ", ".join(f"**{n}**" for n in source_names if n)
 
-                extra_instruction = ""
-                if _wants_table_answer(question):
+                if _wants_table_answer(effective_question):
                     extra_instruction = (
                         "\n\nYÊU CẦU ĐỊNH DẠNG:\n"
-                        "- Nếu dữ liệu trong ngữ cảnh là dạng liệt kê, đối chiếu, mức điểm, danh sách tổ chức hoặc bảng quy đổi, hãy trình bày bằng bảng Markdown.\n"
-                        "- Không in đường dẫn ảnh, tên file ảnh, hoặc URL nội bộ.\n"
+                        "- Nếu dữ liệu ngắn, đồng đều, dễ đối chiếu, hãy ưu tiên bảng Markdown.\n"
+                        "- Nếu số ý ít và mỗi ý ngắn, có thể trình bày thành bảng 2 hoặc 3 cột.\n"
+                        "- Không gộp cả đoạn văn dài vào một ô.\n"
+                        "- Nếu nội dung dài hoặc mỗi dòng quá dài, hãy dùng bullet list thay vì bảng.\n"
                         "- Nếu có cột STT thì giữ cột STT.\n"
-                        "- Nếu dữ liệu không đủ rõ để thành bảng đầy đủ, hãy trả lời bằng bullet ngắn gọn.\n"
+                        "- Không in đường dẫn ảnh, tên file ảnh hoặc URL nội bộ.\n"
+                    )
+                else:
+                    extra_instruction = (
+                        "\n\nYÊU CẦU ĐỊNH DẠNG:\n"
+                        "- Ưu tiên bullet list ngắn gọn, dễ đọc.\n"
+                        "- Nếu các ý ngắn, đồng đều, dưới 10 dòng và dễ đối chiếu thì có thể dùng bảng Markdown.\n"
                     )
 
                 prompt = (
                     f"Tài liệu tham khảo: {src_str}\n\n"
                     f"{'---'.join(ctx_parts)}\n\n"
-                    f"Câu hỏi: {question}"
+                    f"Câu hỏi gốc của người dùng: {question}\n"
+                    f"Câu hỏi đã chuẩn hóa theo ngữ cảnh: {effective_question}"
                     f"{extra_instruction}"
                 )
             else:
-                prompt = question
+                prompt = effective_question
 
             db.add(ChatMessage(session_id=session_id, role="user", content=question))
             await db.commit()
@@ -330,7 +819,6 @@ async def _stream_text_answer(
             if source_names:
                 yield f"data: [SOURCES]{json.dumps(source_names, ensure_ascii=False)}\n\n"
 
-            # Không tự stream ảnh trong luồng text nữa
             selected_images: list[str] = []
 
             model = genai.GenerativeModel(
@@ -353,15 +841,22 @@ async def _stream_text_answer(
             try:
                 stream = await chat_s.send_message_async(prompt, stream=True)
                 async for chunk in stream:
-                    delta = getattr(chunk, "text", "") or ""
+                    delta = _safe_chunk_text(chunk)
                     if delta:
                         full += delta
                         yield f"data: {delta.replace(chr(10), chr(92) + 'n')}\n\n"
             except Exception as e:
                 err = str(e)
-                msg = "Hệ thống quá tải, thử lại sau." if "429" in err or "quota" in err.lower() else f"Lỗi: {err[:120]}"
+                msg = (
+                    "Hệ thống quá tải, thử lại sau."
+                    if "429" in err or "quota" in err.lower() or "RESOURCE_EXHAUSTED" in err
+                    else f"Lỗi: {err[:160]}"
+                )
+                logger.exception("Gemini stream error: %s", err)
                 yield f"data: {msg}\n\n"
                 full = msg
+
+            full = _postprocess_answer(full, effective_question)
 
             db.add(ChatMessage(
                 session_id=session_id,
@@ -499,7 +994,26 @@ async def analyze_uploaded_image(
 
         prompt = _build_upload_image_prompt(user_prompt)
         res = await model.generate_content_async([prompt, pil_img])
-        answer = (getattr(res, "text", "") or "").strip() or "Mình chưa phân tích được ảnh này."
+
+        try:
+            answer = (getattr(res, "text", None) or "").strip()
+        except Exception:
+            answer = ""
+
+        if not answer:
+            candidates = getattr(res, "candidates", None) or []
+            texts: list[str] = []
+            for cand in candidates:
+                content = getattr(cand, "content", None)
+                parts = getattr(content, "parts", None) or []
+                for part in parts:
+                    txt = getattr(part, "text", None)
+                    if txt:
+                        texts.append(txt)
+            answer = "".join(texts).strip()
+
+        answer = answer or "Mình chưa phân tích được ảnh này."
+        answer = _postprocess_answer(answer, user_prompt)
     except Exception as e:
         logger.exception("Analyze uploaded image error: %s", e)
         answer = "Mình chưa phân tích được ảnh này. Hãy thử lại."
