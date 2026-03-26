@@ -133,7 +133,14 @@ export async function streamChat(
         continue;
       }
 
-      onChunk(data.replace(/\\n/g, "\n"));
+      // Backend gửi delta dưới dạng JSON string (json.dumps) để newline không
+      // phá vỡ SSE protocol. Parse ở đây để khôi phục đúng \n, tab, unicode.
+      try {
+        onChunk(JSON.parse(data));
+      } catch {
+        // Fallback cho backend cũ gửi text thô với \n escaped
+        onChunk(data.replace(/\\n/g, "\n"));
+      }
     }
   }
 
