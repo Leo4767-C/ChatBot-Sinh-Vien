@@ -1,4 +1,7 @@
 from pathlib import Path
+
+from fastapi import UploadFile
+
 from app.storage.storage_service import get_storage
 
 
@@ -25,3 +28,9 @@ class StorageHelper:
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding=encoding)
         return str(p)
+
+    def upload_v2(self, path: Path | str, file: UploadFile) -> Path | None:
+        return self.storage.upload_v2(path=path, file=file)
+
+    def download_v2(self, path: Path | str):
+        return self.storage.download_v2(path=path)

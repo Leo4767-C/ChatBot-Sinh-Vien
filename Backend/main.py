@@ -5,8 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
+from app.core.config import settings
 from app.models.database import init_db
-from app.routers import chat, sessions
+from app.rag.qdrant_client_custom import qdrant_client
+from app.routers import chat, sessions, document
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "-1")
@@ -16,10 +18,19 @@ BASE_DIR = Path(__file__).resolve().parent
 IMG_DIR = BASE_DIR / "app" / "data" / "images"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+
+    try:
+        qdrant_client.create_collection(vector_size=settings.EMBEDDING_VECTOR_SIZE)
+        logger.info("✅ Qdrant collection checked/created")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize Qdrant: {e}")
+
     yield
 
 
@@ -36,6 +47,7 @@ app.mount("/images", StaticFiles(directory=str(IMG_DIR)), name="images")
 
 app.include_router(chat.router)
 app.include_router(sessions.router)
+app.include_router(document.router)
 
 
 @app.get("/")

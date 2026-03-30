@@ -1,11 +1,15 @@
 from pathlib import Path
 import shutil
+from typing import BinaryIO
+
+from fastapi import UploadFile
 
 
 class LocalStorageService:
     def __init__(self, base_dir: str = "data/storage"):
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
+        self.upload_dir = Path(__file__).resolve().parents[2] / "data"
 
     def upload(self, path: str, file: str) -> str:
         src = Path(file)
@@ -66,6 +70,30 @@ class LocalStorageService:
 
     def path(self, name: str) -> str:
         return str(self._resolve_source(name))
+
+    def upload_v2(self, path: Path | str, file: UploadFile) -> Path | None:
+        full_path = self.upload_dir / path
+        directory = full_path.parent
+        directory.mkdir(parents=True, exist_ok=True)
+
+        try:
+            with open(full_path, "wb") as f:
+                shutil.copyfileobj(file.file, f)
+            return full_path
+        except Exception as e:
+            return None
+        finally:
+            file.file.close()
+
+    def download_v2(self, path: Path | str):
+        full_path = self.upload_dir / path
+        if not full_path.is_file():
+            return None
+        try:
+            file_stream: BinaryIO = open(full_path, 'rb')
+            return file_stream
+        except Exception:
+            return None
 
 
 _storage = LocalStorageService()

@@ -2,8 +2,7 @@ import asyncio
 import logging
 from typing import Any
 
-from qdrant_client.http import models
-from qdrant_client.http.models import FieldCondition, Filter, MatchValue
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue, models
 
 from app.core.config import settings
 from app.rag import embedder
