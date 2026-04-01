@@ -108,6 +108,13 @@ def _normalize_text(text: str) -> str:
     return text
 
 
+def _is_reference_source_name(name: str) -> bool:
+    source_name = (name or "").strip().lower()
+    if not source_name:
+        return False
+    return Path(source_name).suffix not in {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"}
+
+
 def _safe_chunk_text(chunk) -> str:
     try:
         candidates = getattr(chunk, "candidates", None) or []
@@ -736,7 +743,9 @@ async def _stream_text_answer(
                 source_names = list({
                     c.payload.get("doc_name", "")
                     for c in chunks
-                    if c.payload and c.payload.get("doc_name")
+                    if c.payload
+                    and c.payload.get("doc_name")
+                    and _is_reference_source_name(c.payload.get("doc_name", ""))
                 })
 
                 has_table_context = any(
