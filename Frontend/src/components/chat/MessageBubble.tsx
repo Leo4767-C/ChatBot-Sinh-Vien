@@ -2,14 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { Message } from "@/lib/types";
+import { buildDocumentReferenceUrl, toAbsoluteApiUrl } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SHL } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { BookOpen, Image as ImageIcon } from "lucide-react";
+import { BookOpen, ExternalLink, Image as ImageIcon } from "lucide-react";
 import clsx from "clsx";
 
-const API_BASE = "http://127.0.0.1:8000";
+type NormalizedSource = {
+  key: string;
+  title: string;
+  href: string;
+};
 
 export default function MessageBubble({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
@@ -22,10 +27,7 @@ export default function MessageBubble({ msg }: { msg: Message }) {
     return msg.images
       .map((url) => {
         if (!url) return "";
-        if (url.startsWith("blob:")) return url;
-        if (url.startsWith("http://") || url.startsWith("https://")) return url;
-        if (url.startsWith("/")) return `${API_BASE}${url}`;
-        return `${API_BASE}/${url}`;
+        return toAbsoluteApiUrl(url);
       })
       .filter(Boolean);
   }, [msg.images]);
@@ -121,17 +123,30 @@ export default function MessageBubble({ msg }: { msg: Message }) {
 
         {/* --- HIỂN THỊ NGUỒN (SOURCES) --- */}
         {!isUser && sources.length > 0 && (
-          <div className="flex items-start gap-1.5 px-3 mt-1">
-            <BookOpen className="w-3.5 h-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-slate-500 leading-relaxed">
-              <span className="text-blue-600 font-medium">Nguồn tham khảo: </span>
-              {sources.map((s, i) => (
-                <span key={`${s}-${i}`}>
-                  <span className="italic text-slate-600">{s}</span>
-                  {i < sources.length - 1 && ", "}
-                </span>
+          <div className="mt-1 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3">
+            <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-blue-700">
+              <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
+              <span>Nguồn tham khảo</span>
+            </div>
+
+            <ul className="space-y-1.5">
+              {sources.map((source) => (
+                <li key={source.key}>
+                  <a
+                    href={source.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-start gap-2 text-xs text-slate-600 transition-colors hover:text-blue-700"
+                    title={`Mở tài liệu ${source.title}`}
+                  >
+                    <span className="break-all italic underline decoration-slate-300 underline-offset-2 group-hover:decoration-blue-500">
+                      {source.title}
+                    </span>
+                    <ExternalLink className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                  </a>
+                </li>
               ))}
-            </p>
+            </ul>
           </div>
         )}
       </div>
@@ -143,19 +158,39 @@ export default function MessageBubble({ msg }: { msg: Message }) {
 // CÁC HÀM TIỆN ÍCH VÀ XỬ LÝ (Giữ nguyên logic gốc của bạn)
 // ==========================================
 
-function normalizeSources(rawSources: any[]): string[] {
+function normalizeSources(rawSources: any[]): NormalizedSource[] {
   if (!Array.isArray(rawSources) || rawSources.length === 0) return [];
-  const cleaned = rawSources.map((item) => {
-    if (!item) return "";
-    let title = "";
-    if (typeof item === "string") {
-      title = item;
-    } else if (typeof item === "object") {
-      title = item.title || item.name || item.filename || item.file_name || item.source || "";
+
+  const cleaned = rawSources
+    .map((item) => {
+      if (!item) return null;
+
+      let title = "";
+      if (typeof item === "string") {
+        title = item;
+      } else if (typeof item === "object") {
+        title = item.title || item.name || item.filename || item.file_name || item.source || "";
+      }
+
+      const sanitizedTitle = sanitizeSourceTitle(title);
+      if (!sanitizedTitle) return null;
+
+      return {
+        key: `${sanitizedTitle}-${buildDocumentReferenceUrl(sanitizedTitle)}`,
+        title: sanitizedTitle,
+        href: buildDocumentReferenceUrl(sanitizedTitle),
+      };
+    })
+    .filter(Boolean) as NormalizedSource[];
+
+  const deduped = new Map<string, NormalizedSource>();
+  cleaned.forEach((source) => {
+    if (!deduped.has(source.title)) {
+      deduped.set(source.title, source);
     }
-    return sanitizeSourceTitle(title);
-  }).filter(Boolean);
-  return Array.from(new Set(cleaned));
+  });
+
+  return Array.from(deduped.values());
 }
 
 function sanitizeSourceTitle(title: string) {

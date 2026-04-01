@@ -1,4 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export interface ChatSession {
   id: string;
@@ -23,26 +23,43 @@ export interface ImageChatResponse {
   sources?: ChatSource[];
 }
 
+export function toAbsoluteApiUrl(path: string) {
+  if (!path) return "";
+  if (path.startsWith("blob:")) return path;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  if (path.startsWith("/")) return `${API_BASE}${path}`;
+  return `${API_BASE}/${path}`;
+}
+
+export function trimDocumentExtension(filename: string) {
+  return filename.trim().replace(/\.[^.]+$/, "");
+}
+
+export function buildDocumentReferenceUrl(sourceName: string) {
+  const filename = trimDocumentExtension(sourceName);
+  return `${API_BASE}/api/document/reference/${encodeURIComponent(filename)}`;
+}
+
 export async function createSession(): Promise<ChatSession> {
-  const r = await fetch(`${BASE}/api/sessions/`, { method: "POST" });
+  const r = await fetch(`${API_BASE}/api/sessions/`, { method: "POST" });
   if (!r.ok) throw new Error("Không tạo được session");
   return r.json();
 }
 
 export async function getSessions(): Promise<ChatSession[]> {
-  const r = await fetch(`${BASE}/api/sessions/`);
+  const r = await fetch(`${API_BASE}/api/sessions/`);
   if (!r.ok) return [];
   return r.json();
 }
 
 export async function getHistory(sid: string) {
-  const r = await fetch(`${BASE}/api/sessions/${sid}/history`);
+  const r = await fetch(`${API_BASE}/api/sessions/${sid}/history`);
   if (!r.ok) return [];
   return r.json();
 }
 
 export async function deleteSession(sid: string) {
-  await fetch(`${BASE}/api/sessions/${sid}`, { method: "DELETE" });
+  await fetch(`${API_BASE}/api/sessions/${sid}`, { method: "DELETE" });
 }
 
 export async function uploadImage(
@@ -55,7 +72,7 @@ export async function uploadImage(
   form.append("image", file);
   if (question?.trim()) form.append("question", question.trim());
 
-  const r = await fetch(`${BASE}/api/chat/image`, {
+  const r = await fetch(`${API_BASE}/api/chat/image`, {
     method: "POST",
     body: form,
   });
@@ -79,7 +96,7 @@ export async function streamChat(
 ) {
   let r: Response;
   try {
-    r = await fetch(`${BASE}/api/chat/stream`, {
+    r = await fetch(`${API_BASE}/api/chat/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: sessionId, question }),
