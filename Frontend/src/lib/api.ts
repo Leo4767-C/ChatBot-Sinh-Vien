@@ -32,7 +32,7 @@ export function toAbsoluteApiUrl(path: string) {
 }
 
 export function trimDocumentExtension(filename: string) {
-  return filename.trim().replace(/\.[^.]+$/, "");
+  return filename.trim().replace(/\s*\.[^.]+$/, "").trim();
 }
 
 export function buildDocumentReferenceUrl(sourceName: string) {
