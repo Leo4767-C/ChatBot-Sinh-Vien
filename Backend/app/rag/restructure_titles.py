@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from unstructured.documents.elements import ElementType
 from unstructured.partition.auto import partition
 from unstructured.partition.html import partition_html
 from unstructured.partition.md import partition_md
@@ -356,3 +357,46 @@ def chunk_by_title(file_path: str | Path) -> dict:
     structured.setdefault("pages", [])
 
     return structured
+
+def chunk_manually_doc(file_path: str | Path) -> dict:
+    path = Path(file_path)
+    elements = _partition_file(path)
+    if not elements:
+        return _ensure_root(path)
+
+    nodes = []
+    is_title = True
+    node = dict()
+
+    for el in elements:
+        text = el.text.strip()
+        log.info(f"Processing {el.category}: {text[:10]}...")
+
+        if text == "#####":  # kết thúc 1 đoạn
+            if node:
+                nodes.append(node)
+            node = {}
+            is_title = True
+        elif is_title:
+            node = {
+                "title_id": el.id,
+                "title": text,
+                "content": "",
+                "page_number": []
+            }
+            is_title = False
+        else:
+            node.setdefault("content", "")
+            node.setdefault("page_number", [])
+            node["content"] += text + "\n"
+            page_number = getattr(el.metadata, "page_number", None)
+            if isinstance(page_number, int):
+                node["page_number"].append(page_number)
+
+    return {
+        "titleId": _make_title_id(path.stem, -1),
+        "title": path.stem,
+        "content": "",
+        "pages": [-1],
+        "children": nodes,
+    }

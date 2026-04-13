@@ -10,7 +10,7 @@ from openpyxl.reader.excel import load_workbook
 
 from app.core.config import settings
 from app.rag.converters import DocumentConverter, convert_to_pdf
-from app.rag.restructure_titles import chunk_by_title
+from app.rag.restructure_titles import chunk_by_title, chunk_manually_doc
 from app.storage.storage_service import get_storage
 from app.utils.helpers import project_root
 
@@ -228,7 +228,7 @@ def chunk_excel(file: Path, tokenizer: tiktoken.Encoding, max_len: int = 600) ->
     return chunks
 
 
-def run(model: str, src: Union[str, Path], overwrite: bool = True, to_console: bool = True) -> List[dict]:
+def run(model: str, src: Union[str, Path], overwrite: bool = True, to_console: bool = True, auto = True) -> List[dict]:
     """
     src có thể là:
     - đường dẫn local thật
@@ -264,7 +264,7 @@ def run(model: str, src: Union[str, Path], overwrite: bool = True, to_console: b
             else:
                 parsed_path = local_path
 
-        data = chunk_by_title(parsed_path)
+        data = chunk_by_title(parsed_path) if auto else chunk_manually_doc(parsed_path)
         chunks = chunk_doc(data, model=model)
         return chunks
 

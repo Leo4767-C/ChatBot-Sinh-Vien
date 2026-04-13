@@ -135,7 +135,7 @@ def should_ingest(file_path: Path):
     return "update", file_hash, existing
 
 
-def ingest_file(file_path: Path, doc_id: str | None = None, force: bool = False) -> int:
+def ingest_file(file_path: Path, doc_id: str | None = None, force: bool = False, auto = True) -> int:
     log.info("\n%s", "=" * 60)
     log.info("📄 Đang xử lý: %s", file_path.name)
     log.info("%s", "=" * 60)
@@ -166,6 +166,7 @@ def ingest_file(file_path: Path, doc_id: str | None = None, force: bool = False)
             src=str(file_path),
             overwrite=True,
             to_console=False,
+            auto=auto,
         )
     except Exception as e:
         log.exception("  Lỗi parse: %s", e)

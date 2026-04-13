@@ -40,7 +40,8 @@ async def upload_document(
         db: AsyncSession = Depends(get_db),
         *,
         file: UploadFile = File(...),
-        filename: str = Form(None)
+        filename: str = Form(None),
+        auto: bool = Form(True)
 ):
     logger.info("Start uploading document")
     if not filename:
@@ -63,7 +64,7 @@ async def upload_document(
         # status="ok"
     )
 
-    doc.chunk_count = ingest_file(full_path, doc.id)
+    doc.chunk_count = ingest_file(file_path=full_path, doc_id=doc.id, auto=auto)
     doc.status = "ok"
 
     logger.info("Ingest document finished")
