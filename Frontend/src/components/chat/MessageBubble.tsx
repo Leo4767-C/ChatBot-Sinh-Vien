@@ -208,6 +208,7 @@ function sanitizeSourceTitle(title: string) {
   if (!cleaned) return "";
   const badValues = new Set(["bảng", "context", "table", "nguồn", "nguon", "không rõ nguồn"]);
   if (badValues.has(cleaned.toLowerCase())) return "";
+  if (/\.(png|jpg|jpeg|webp|gif|bmp)$/i.test(cleaned)) return "";
   return cleaned;
 }
 

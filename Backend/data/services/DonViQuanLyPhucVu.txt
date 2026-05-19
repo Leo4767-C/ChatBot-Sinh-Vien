@@ -1,0 +1,172 @@
+THÔNG TIN VỀ CÁC ĐƠN VỊ QUẢN LÝ, PHỤC VỤ CỦA TRƯỜNG ĐẠI HỌC THỦY LỢI
+
+- Chủ đề của dữ liệu là thông tin về các đơn vị quản lý, phục vụ của Trường Đại học Thủy lợi.
+- Dữ liệu này gồm tên đơn vị, chức năng, văn phòng liên hệ, số điện thoại và số fax nếu có.
+
+- Phòng Hành chính - Tổng hợp của Trường Đại học Thủy lợi phụ trách văn thư lưu trữ.
+- Phòng Hành chính - Tổng hợp của Trường Đại học Thủy lợi phụ trách kế hoạch tổng hợp.
+- Phòng Hành chính - Tổng hợp của Trường Đại học Thủy lợi phụ trách cải cách hành chính.
+- Phòng Hành chính - Tổng hợp của Trường Đại học Thủy lợi phụ trách lễ tân phục vụ.
+- Phòng Hành chính - Tổng hợp của Trường Đại học Thủy lợi phụ trách đối ngoại.
+- Phòng Hành chính - Tổng hợp của Trường Đại học Thủy lợi phụ trách thanh tra và pháp chế.
+- Văn phòng của Phòng Hành chính - Tổng hợp đặt tại P.200 A1.
+- Văn phòng của Phòng Hành chính - Tổng hợp đặt tại P.203 A1.
+- Văn phòng của Phòng Hành chính - Tổng hợp đặt tại P.204 A1.
+- Văn phòng của Phòng Hành chính - Tổng hợp đặt tại P.111 A1.
+- Văn phòng của Phòng Hành chính - Tổng hợp đặt tại P.113 A1.
+- Phòng Hành chính - Tổng hợp còn có Tổ xe.
+- Số điện thoại liên hệ của Phòng Hành chính - Tổng hợp là 0243.8522201.
+- Số điện thoại liên hệ của Phòng Hành chính - Tổng hợp là 0243.8524482.
+- Số điện thoại liên hệ của Phòng Hành chính - Tổng hợp là 0243.8521435.
+- Số điện thoại liên hệ của Phòng Hành chính - Tổng hợp là 024.35643402.
+- Số điện thoại liên hệ của Phòng Hành chính - Tổng hợp là 024.35643432.
+- Số điện thoại liên hệ của Phòng Hành chính - Tổng hợp là 0243.5638924.
+- Số fax của Phòng Hành chính - Tổng hợp là 0243.5633351.
+
+- Phòng Tổ chức cán bộ của Trường Đại học Thủy lợi phụ trách tổ chức bộ máy.
+- Phòng Tổ chức cán bộ của Trường Đại học Thủy lợi phụ trách quản lý biên chế nhân sự.
+- Phòng Tổ chức cán bộ của Trường Đại học Thủy lợi phụ trách chế độ chính sách.
+- Phòng Tổ chức cán bộ của Trường Đại học Thủy lợi phụ trách đào tạo và bồi dưỡng.
+- Phòng Tổ chức cán bộ của Trường Đại học Thủy lợi phụ trách thi đua và khen thưởng.
+- Phòng Tổ chức cán bộ của Trường Đại học Thủy lợi phụ trách bảo vệ chính trị nội bộ.
+- Văn phòng của Phòng Tổ chức cán bộ đặt tại P.209 A1.
+- Văn phòng của Phòng Tổ chức cán bộ đặt tại P.211 A1.
+- Văn phòng của Phòng Tổ chức cán bộ đặt tại P.213 A1.
+- Số điện thoại liên hệ của Phòng Tổ chức cán bộ là 0243.5633086.
+- Số điện thoại liên hệ của Phòng Tổ chức cán bộ là 0243.5656653.
+- Số điện thoại liên hệ của Phòng Tổ chức cán bộ là 0243.8521439.
+
+- Phòng Đào tạo của Trường Đại học Thủy lợi phụ trách tuyển sinh.
+- Phòng Đào tạo của Trường Đại học Thủy lợi phụ trách xây dựng chương trình đào tạo.
+- Phòng Đào tạo của Trường Đại học Thủy lợi phụ trách quản lý chương trình đào tạo.
+- Phòng Đào tạo của Trường Đại học Thủy lợi phụ trách tổ chức chương trình đào tạo.
+- Phòng Đào tạo của Trường Đại học Thủy lợi phụ trách phát triển chương trình đào tạo.
+- Phòng Đào tạo của Trường Đại học Thủy lợi phụ trách truyền thông trong đào tạo.
+- Phòng Đào tạo của Trường Đại học Thủy lợi phụ trách hợp tác trong đào tạo.
+- Văn phòng của Phòng Đào tạo đặt tại P.130 A4.
+- Văn phòng của Phòng Đào tạo đặt tại P.132 A4.
+- Văn phòng của Phòng Đào tạo đặt tại P.134 A4.
+- Số điện thoại liên hệ của Phòng Đào tạo là 0243.8521441.
+- Số điện thoại liên hệ của Phòng Đào tạo là 0243.5638069.
+- Số điện thoại liên hệ của Phòng Đào tạo là 0243.5631537.
+- Số điện thoại liên hệ của Phòng Đào tạo là 0243.8524529.
+- Số fax của Phòng Đào tạo là 0243.5638923.
+
+- Phòng Khảo thí và Đảm bảo chất lượng của Trường Đại học Thủy lợi phụ trách quản lý khảo thí.
+- Phòng Khảo thí và Đảm bảo chất lượng của Trường Đại học Thủy lợi phụ trách đánh giá chất lượng giáo dục.
+- Phòng Khảo thí và Đảm bảo chất lượng của Trường Đại học Thủy lợi phụ trách đảm bảo chất lượng giáo dục.
+- Văn phòng của Phòng Khảo thí và Đảm bảo chất lượng đặt tại P.115 A1.
+- Văn phòng của Phòng Khảo thí và Đảm bảo chất lượng đặt tại P.104 A1.
+- Số điện thoại liên hệ của Phòng Khảo thí và Đảm bảo chất lượng là 0243.5643417.
+- Số điện thoại liên hệ của Phòng Khảo thí và Đảm bảo chất lượng là 0243.5641228.
+
+- Phòng Chính trị và Công tác sinh viên của Trường Đại học Thủy lợi phụ trách công tác chính trị tư tưởng cho cán bộ, viên chức và sinh viên.
+- Phòng Chính trị và Công tác sinh viên của Trường Đại học Thủy lợi phụ trách thông tin tuyên truyền.
+- Phòng Chính trị và Công tác sinh viên của Trường Đại học Thủy lợi phụ trách công tác sinh viên.
+- Văn phòng của Phòng Chính trị và Công tác sinh viên đặt tại P.110 A1.
+- Văn phòng của Phòng Chính trị và Công tác sinh viên đặt tại P.112 A1.
+- Văn phòng của Phòng Chính trị và Công tác sinh viên đặt tại P.116 A1.
+- Văn phòng của Phòng Chính trị và Công tác sinh viên đặt tại P.118 A1.
+- Số điện thoại liên hệ của Phòng Chính trị và Công tác sinh viên là 0243.5639577.
+- Số điện thoại liên hệ của Phòng Chính trị và Công tác sinh viên là 0243.5640199.
+- Số điện thoại liên hệ của Phòng Chính trị và Công tác sinh viên là 0243.5639117.
+
+- Phòng Khoa học công nghệ và Hợp tác quốc tế của Trường Đại học Thủy lợi phụ trách quản lý nghiên cứu khoa học.
+- Phòng Khoa học công nghệ và Hợp tác quốc tế của Trường Đại học Thủy lợi phụ trách chuyển giao công nghệ.
+- Phòng Khoa học công nghệ và Hợp tác quốc tế của Trường Đại học Thủy lợi phụ trách sở hữu trí tuệ.
+- Phòng Khoa học công nghệ và Hợp tác quốc tế của Trường Đại học Thủy lợi phụ trách thông tin khoa học công nghệ.
+- Phòng Khoa học công nghệ và Hợp tác quốc tế của Trường Đại học Thủy lợi phụ trách tạp chí khoa học.
+- Phòng Khoa học công nghệ và Hợp tác quốc tế của Trường Đại học Thủy lợi phụ trách hợp tác quốc tế.
+- Phòng Khoa học công nghệ và Hợp tác quốc tế của Trường Đại học Thủy lợi phụ trách các dự án quốc tế.
+- Văn phòng của Phòng Khoa học công nghệ và Hợp tác quốc tế đặt tại P.103 A1.
+- Văn phòng của Phòng Khoa học công nghệ và Hợp tác quốc tế đặt tại P.105 A1.
+- Văn phòng của Phòng Khoa học công nghệ và Hợp tác quốc tế đặt tại P.508 A1.
+- Văn phòng của Phòng Khoa học công nghệ và Hợp tác quốc tế đặt tại P.510 A1.
+- Số điện thoại liên hệ của Phòng Khoa học công nghệ và Hợp tác quốc tế là 0243.8533083.
+- Số điện thoại liên hệ của Phòng Khoa học công nghệ và Hợp tác quốc tế là 0243.8521437.
+- Số điện thoại liên hệ của Phòng Khoa học công nghệ và Hợp tác quốc tế là 0243.5641053.
+- Số điện thoại liên hệ của Phòng Khoa học công nghệ và Hợp tác quốc tế là 0243.8534198.
+- Số điện thoại liên hệ của Phòng Khoa học công nghệ và Hợp tác quốc tế là 0243.5638158.
+- Số fax của Phòng Khoa học công nghệ và Hợp tác quốc tế là 0243.5636221.
+
+- Phòng Tài chính - Kế toán của Trường Đại học Thủy lợi phụ trách lập kế hoạch tài chính.
+- Phòng Tài chính - Kế toán của Trường Đại học Thủy lợi phụ trách quản lý kế hoạch tài chính.
+- Phòng Tài chính - Kế toán của Trường Đại học Thủy lợi phụ trách tổ chức, khai thác và sử dụng nguồn tài chính.
+- Phòng Tài chính - Kế toán của Trường Đại học Thủy lợi phụ trách thực hiện công tác kế toán.
+- Văn phòng của Phòng Tài chính - Kế toán đặt tại P.215 A1.
+- Văn phòng của Phòng Tài chính - Kế toán đặt tại P.217 A1.
+- Văn phòng của Phòng Tài chính - Kế toán đặt tại P.219 A1.
+- Văn phòng của Phòng Tài chính - Kế toán đặt tại P.221 A1.
+- Số điện thoại liên hệ của Phòng Tài chính - Kế toán là 0243.5634602.
+- Số điện thoại liên hệ của Phòng Tài chính - Kế toán là 0243.5631536.
+- Số điện thoại liên hệ của Phòng Tài chính - Kế toán là 0243.5633713.
+- Số điện thoại liên hệ của Phòng Tài chính - Kế toán là 0243.5639190.
+
+- Phòng Quản trị - Thiết bị của Trường Đại học Thủy lợi phụ trách quản lý cơ sở vật chất.
+- Phòng Quản trị - Thiết bị của Trường Đại học Thủy lợi phụ trách quản lý hạ tầng.
+- Phòng Quản trị - Thiết bị của Trường Đại học Thủy lợi phụ trách quản lý thiết bị.
+- Phòng Quản trị - Thiết bị của Trường Đại học Thủy lợi phụ trách đầu tư xây dựng.
+- Phòng Quản trị - Thiết bị của Trường Đại học Thủy lợi phụ trách phòng cháy chữa cháy.
+- Phòng Quản trị - Thiết bị của Trường Đại học Thủy lợi phụ trách an ninh trật tự.
+- Phòng Quản trị - Thiết bị của Trường Đại học Thủy lợi phụ trách cảnh quan môi trường.
+- Văn phòng của Phòng Quản trị - Thiết bị đặt tại P.101 A5.
+- Văn phòng của Phòng Quản trị - Thiết bị đặt tại P.102 A5.
+- Văn phòng của Phòng Quản trị - Thiết bị đặt tại P.103 A5.
+- Văn phòng của Phòng Quản trị - Thiết bị đặt tại P.104 A5.
+- Văn phòng của Phòng Quản trị - Thiết bị đặt tại P.109 A1.
+- Phòng Quản trị - Thiết bị có tổ giảng đường A2.
+- Phòng Quản trị - Thiết bị có tổ giảng đường A4.
+- Phòng Quản trị - Thiết bị có tổ giảng đường B1.
+- Phòng Quản trị - Thiết bị phụ trách KTX Cao học.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.5635671.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.8522819.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.5635671.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.8524727.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.8521440.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.8534194.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.5637814.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.5642518.
+- Số điện thoại liên hệ của Phòng Quản trị - Thiết bị là 043.8521446.
+
+- Trung tâm Nội trú của Trường Đại học Thủy lợi phụ trách quản lý khu nội trú.
+- Trung tâm Nội trú của Trường Đại học Thủy lợi phụ trách đảm bảo điều kiện sinh hoạt trong khu nội trú.
+- Trung tâm Nội trú của Trường Đại học Thủy lợi phụ trách đảm bảo an ninh trật tự trong khu nội trú.
+- Trung tâm Nội trú của Trường Đại học Thủy lợi phụ trách quản lý dịch vụ ăn uống và căng tin.
+- Văn phòng của Trung tâm Nội trú đặt tại P.303 KTX K1.
+- Văn phòng của Trung tâm Nội trú đặt tại P.305 KTX K1.
+- Văn phòng của Trung tâm Nội trú đặt tại P.601 KTX K1.
+- Văn phòng của Trung tâm Nội trú đặt tại P.701 KTX K1.
+- Văn phòng của Trung tâm Nội trú gắn với Nhà 2.
+- Văn phòng của Trung tâm Nội trú gắn với Nhà 3.
+- Văn phòng của Trung tâm Nội trú gắn với Nhà 4.
+- Số điện thoại liên hệ của Trung tâm Nội trú là 0243.5643058.
+- Số điện thoại liên hệ của Trung tâm Nội trú là 0243.5643059.
+
+- Trung tâm Tin học của Trường Đại học Thủy lợi phụ trách tin học hóa quản trị điều hành và quản lý hành chính.
+- Trung tâm Tin học của Trường Đại học Thủy lợi phụ trách nghiên cứu về công nghệ thông tin.
+- Trung tâm Tin học của Trường Đại học Thủy lợi phụ trách ứng dụng công nghệ thông tin.
+- Trung tâm Tin học của Trường Đại học Thủy lợi phụ trách đào tạo công nghệ thông tin.
+- Trung tâm Tin học của Trường Đại học Thủy lợi phụ trách dịch vụ công nghệ thông tin.
+- Văn phòng của Trung tâm Tin học đặt tại Phòng trực C5.
+- Văn phòng của Trung tâm Tin học đặt tại P.204 C5.
+- Văn phòng của Trung tâm Tin học đặt tại P.104 tòa A45.
+- Số điện thoại liên hệ của Trung tâm Tin học là 0243.5635915.
+- Số điện thoại liên hệ của Trung tâm Tin học là 0243.5638072.
+- Số điện thoại liên hệ của Trung tâm Tin học là 0243.5640706.
+
+- Thư viện của Trường Đại học Thủy lợi có chức năng lưu trữ sách báo, tạp chí, giáo trình và tài liệu điện tử.
+- Thư viện của Trường Đại học Thủy lợi có chức năng thu thập, bảo quản, quản lý và khai thác tài liệu.
+- Thư viện của Trường Đại học Thủy lợi cung cấp thông tin phục vụ giảng dạy, học tập và nghiên cứu.
+- Văn phòng của Thư viện đặt tại P.207 A45.
+- Văn phòng của Thư viện đặt tại P.205 A45.
+- Văn phòng của Thư viện đặt tại P.305 A45.
+- Số điện thoại liên hệ của Thư viện là 024.35640068.
+- Số điện thoại liên hệ của Thư viện là 024.35630971.
+- Số điện thoại liên hệ của Thư viện là 024.38521445.
+
+- Trạm Y tế của Trường Đại học Thủy lợi phụ trách chăm sóc sức khỏe ban đầu cho cán bộ viên chức và sinh viên.
+- Trạm Y tế của Trường Đại học Thủy lợi phụ trách y tế học đường.
+- Trạm Y tế của Trường Đại học Thủy lợi phụ trách phòng chống dịch bệnh.
+- Trạm Y tế của Trường Đại học Thủy lợi phụ trách vệ sinh toàn trường.
+- Văn phòng của Trạm Y tế đặt tại KTX Nhà 4.
+- Số điện thoại liên hệ của Trạm Y tế là 0243.5632839.
