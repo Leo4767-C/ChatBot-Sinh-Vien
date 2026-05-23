@@ -1,10 +1,10 @@
 # StudyBot - Conversational RAG Assistant
 
-StudyBot là hệ thống trợ lý học đường hỗ trợ sinh viên tra cứu quy chế học vụ, điểm chuẩn, chương trình đào tạo và tài liệu nghiên cứu. Hệ thống được phát triển dựa trên kiến trúc RAG (Retrieval-Augmented Generation) tối ưu hóa cho ngôn ngữ tiếng Việt, kết hợp tìm kiếm lai (Hybrid Search), trích xuất bảng biểu nâng cao và cơ chế xử lý đàm thoại đa lượt (Multi-turn conversational RAG).
+StudyBot is an academic assistant system that helps students look up academic regulations, admission scores, training programs, and research materials. The system is built on a RAG (Retrieval-Augmented Generation) architecture optimized for the Vietnamese language, combining Hybrid Search, advanced table extraction, and a Multi-turn Conversational RAG mechanism.
 
-## Kiến trúc Kỹ thuật & Công nghệ sử dụng
+## Technical Architecture & Technology Stack
 
-Hệ thống được thiết kế theo mô hình decoupled hoàn toàn giữa Frontend và Backend nhằm tối ưu hóa khả năng mở rộng (scalability) và hiệu năng phản hồi:
+The system follows a fully decoupled architecture between Frontend and Backend to optimize scalability and response performance:
 
 ```text
                   +-----------------------------------+
@@ -24,55 +24,55 @@ Hệ thống được thiết kế theo mô hình decoupled hoàn toàn giữa F
 ```
 
 ### 1. Backend Service (FastAPI)
-- **FastAPI & Uvicorn**: Sử dụng mô hình xử lý bất đồng bộ (Asynchronous ASGI) để tối ưu hóa tài nguyên máy chủ và xử lý số lượng kết nối đồng thời (concurrency) cao.
-- **SQLAlchemy 2.0 & aiosqlite**: Quản lý cơ sở dữ liệu quan hệ (SQLite) ở chế độ non-blocking để lưu trữ lịch sử tin nhắn và thông tin phiên giao dịch (session metadata).
-- **Celery / Background Tasks**: Xử lý bất đồng bộ các tác vụ lưu trữ dữ liệu hội thoại và ghi chép nhật ký hệ thống nhằm giảm thiểu độ trễ cho người dùng cuối.
+- **FastAPI & Uvicorn**: Uses an asynchronous processing model (Asynchronous ASGI) to optimize server resources and handle high concurrency.
+- **SQLAlchemy 2.0 & aiosqlite**: Manages the relational database (SQLite) in non-blocking mode for storing message history and session metadata.
+- **Celery / Background Tasks**: Asynchronously processes conversation data storage and system logging tasks to minimize end-user latency.
 
 ### 2. RAG & Vector Engine (Qdrant & BAAI/bge-m3)
-- **Hybrid Search Engine**: Sử dụng mô hình đa ngôn ngữ BAAI/bge-m3 để biểu diễn văn bản dưới hai định dạng vector đồng thời:
-  - **Dense Vector (1024 chiều)**: Phản ánh ngữ nghĩa và ngữ cảnh sâu của truy vấn.
-  - **Sparse Vector**: Khớp chính xác các từ khóa và thuật ngữ chuyên ngành.
-- **Reciprocal Rank Fusion (RRF)**: Tích hợp tính năng Fusion Query của Qdrant DB để kết hợp xếp hạng kết quả từ tìm kiếm Dense và Sparse, cải thiện độ chính xác tra cứu so với tìm kiếm vector tiêu chuẩn.
-- **Table-Aware Chunking**: Module trích xuất bảng biểu chuyên dụng (`table_extractor.py`) phân tách dữ liệu bảng trong PDF và chuẩn hóa sang định dạng Markdown trước khi lập chỉ mục (`is_table=True`), khắc phục hạn chế mất cấu trúc bảng của các hệ thống RAG truyền thống.
+- **Hybrid Search Engine**: Uses the multilingual BAAI/bge-m3 model to represent text in two simultaneous vector formats:
+  - **Dense Vector (1024 dimensions)**: Captures deep semantics and contextual meaning of queries.
+  - **Sparse Vector**: Performs exact matching on keywords and domain-specific terminology.
+- **Reciprocal Rank Fusion (RRF)**: Leverages Qdrant DB's Fusion Query feature to combine rankings from Dense and Sparse searches, improving retrieval accuracy over standard vector search.
+- **Table-Aware Chunking**: A dedicated table extraction module (`table_extractor.py`) parses tabular data from PDFs and normalizes it into Markdown format before indexing (`is_table=True`), overcoming the table structure loss limitation of traditional RAG systems.
 
 ### 3. LLM Orchestration & Prompt Engineering
-- **Google Gemini SDK**: Đảm nhận vai trò tạo câu trả lời (Generator) dựa trên ngữ cảnh được cung cấp.
-- **Conversational Query Rewriting**: Đối với các truy vấn tiếp nối (follow-up), module rewriter tự động phân tích lịch sử hội thoại gần nhất để làm rõ nghĩa và mở rộng các truy vấn ngắn thành câu hỏi hoàn chỉnh ngữ nghĩa trước khi định tuyến chúng đến Vector DB.
-- **Multimodal Comprehension**: Hỗ trợ xử lý dữ liệu đầu vào là hình ảnh tài liệu hoặc bài giảng, tự động thực hiện OCR và tóm tắt thông qua Gemini Vision API.
+- **Google Gemini SDK**: Serves as the answer generator based on the provided context.
+- **Conversational Query Rewriting**: For follow-up queries, the rewriter module automatically analyzes recent conversation history to disambiguate and expand short queries into semantically complete questions before routing them to the Vector DB.
+- **Multimodal Comprehension**: Supports image-based document or lecture inputs, automatically performing OCR and summarization through the Gemini Vision API.
 
 ### 4. Frontend Application (Next.js)
-- **Next.js App Router & TypeScript**: Đảm bảo tính toàn vẹn của mã nguồn, tối ưu hóa SEO và cải thiện hiệu năng tải trang.
-- **Server-Sent Events (SSE) Client**: Tiếp nhận dữ liệu dạng luồng (streaming response) từ Backend để tạo hiệu ứng hiển thị thời gian thực.
-- **Web Speech API**: Tích hợp công cụ nhận diện giọng nói (Speech-to-Text) nguyên bản của trình duyệt để hỗ trợ nhập liệu bằng giọng nói.
+- **Next.js App Router & TypeScript**: Ensures codebase integrity, optimizes SEO, and improves page load performance.
+- **Server-Sent Events (SSE) Client**: Receives streaming responses from the Backend to deliver real-time display effects.
+- **Web Speech API**: Integrates the browser's native Speech-to-Text engine to support voice input.
 
-## Cấu trúc Thư mục Dự án
+## Project Directory Structure
 
 ```text
 chatbot-student/
 ├── Backend/                    # FastAPI Python Service
 │   ├── app/
-│   │   ├── core/               # Khởi tạo cấu hình (config.py)
-│   │   ├── models/             # Định nghĩa Schema DB (database.py)
-│   │   ├── routers/            # Các API endpoints (chat, sessions, document)
-│   │   ├── rag/                # Pipeline RAG, Embedder, Retriever, Extractor
-│   │   └── llm/                # Trình kết nối dịch vụ Gemini API
-│   ├── main.py                 # Entry point khởi chạy ứng dụng
-│   ├── ingest.py               # Script xử lý và lập chỉ mục dữ liệu
-│   └── requirements.txt        # Các thư viện phụ thuộc
+│   │   ├── core/               # Configuration initialization (config.py)
+│   │   ├── models/             # DB schema definitions (database.py)
+│   │   ├── routers/            # API endpoints (chat, sessions, document)
+│   │   ├── rag/                # RAG Pipeline, Embedder, Retriever, Extractor
+│   │   └── llm/                # Gemini API service connector
+│   ├── main.py                 # Application entry point
+│   ├── ingest.py               # Data processing and indexing script
+│   └── requirements.txt        # Python dependencies
 │
 └── Frontend/                   # Next.js Application
     ├── src/
-    │   ├── app/                # Cấu trúc trang (page.tsx, layout.tsx)
-    │   ├── components/         # Giao diện UI (ChatInput, MessageBubble)
-    │   ├── hooks/              # Custom Hook xử lý Web Speech API
-    │   └── lib/                # API Client gọi đến FastAPI
+    │   ├── app/                # Page structure (page.tsx, layout.tsx)
+    │   ├── components/         # UI components (ChatInput, MessageBubble)
+    │   ├── hooks/              # Custom Hook for Web Speech API
+    │   └── lib/                # API Client for FastAPI
     └── package.json
 ```
 
-## Hướng dẫn Cài đặt & Vận hành
+## Installation & Deployment Guide
 
-### 1. Chuẩn bị biến môi trường
-Tạo tệp `.env` tại thư mục `Backend/` với cấu trúc sau:
+### 1. Configure Environment Variables
+Create a `.env` file in the `Backend/` directory with the following structure:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
@@ -84,76 +84,76 @@ EMBEDDING_VECTOR_SIZE=1024
 DEVICE=cpu
 ```
 
-### 2. Khởi chạy Backend & Vector Database (Qdrant)
+### 2. Start the Backend & Vector Database (Qdrant)
 
-Yêu cầu máy chủ đã cài đặt Docker để vận hành Qdrant:
+Docker must be installed on the server to run Qdrant:
 ```bash
-# Khởi chạy container Qdrant DB
+# Start the Qdrant DB container
 docker run -d -p 6333:6333 -p 6334:6334 -v $(pwd)/qdrant_storage:/qdrant/storage qdrant/qdrant
 ```
 
-Cài đặt các thư viện phụ thuộc Python và khởi chạy FastAPI server:
+Install Python dependencies and start the FastAPI server:
 ```bash
 cd Backend
 
-# Khởi tạo và kích hoạt môi trường ảo
+# Create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate # Trên Windows: venv\Scripts\activate
+source venv/bin/activate # On Windows: venv\Scripts\activate
 
-# Cài đặt thư viện
+# Install dependencies
 pip install -r requirements.txt
 
-# Khởi chạy uvicorn server ở chế độ hot-reload
+# Start the uvicorn server in hot-reload mode
 python main.py
 ```
-*Backend API hoạt động tại địa chỉ:* `http://localhost:8000`
+*Backend API is available at:* `http://localhost:8000`
 
-### 3. Nạp Tài liệu Tri thức (Data Ingestion Pipeline)
+### 3. Knowledge Document Ingestion (Data Ingestion Pipeline)
 
-Để đưa tài liệu quy chế, điểm chuẩn (PDF, Docx, TXT) vào cơ sở dữ liệu Vector Qdrant:
-1. Đặt các tệp tài liệu hỗ trợ (`.pdf`, `.docx`, `.txt`, `.md`) vào thư mục `Backend/data/`.
-2. Chạy script nạp dữ liệu:
+To ingest regulation documents, admission scores (PDF, Docx, TXT) into the Qdrant Vector Database:
+1. Place the supported document files (`.pdf`, `.docx`, `.txt`, `.md`) in the `Backend/data/` directory.
+2. Run the ingestion script:
 ```bash
-# Nạp dữ liệu mới trong thư mục data/ (có cơ chế checksum bỏ qua file không thay đổi)
+# Ingest new data from the data/ directory (includes checksum mechanism to skip unchanged files)
 python ingest.py
 
-# Xóa toàn bộ dữ liệu hiện có trong Qdrant và lập chỉ mục lại từ đầu
+# Clear all existing data in Qdrant and re-index from scratch
 python ingest.py --clear
 ```
 
-### 4. Khởi chạy Frontend (Next.js)
+### 4. Start the Frontend (Next.js)
 
-Tạo tệp `.env.local` tại thư mục `Frontend/`:
+Create a `.env.local` file in the `Frontend/` directory:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-Cài đặt các gói Node.js và chạy ứng dụng ở chế độ Development:
+Install Node.js packages and run the application in Development mode:
 ```bash
 cd Frontend
 
-# Cài đặt package thông qua npm hoặc pnpm
+# Install packages via npm or pnpm
 npm install
 
-# Khởi chạy Next.js dev server
+# Start the Next.js dev server
 npm run dev
 ```
-*Frontend chạy tại địa chỉ:* `http://localhost:3000`
+*Frontend is available at:* `http://localhost:3000`
 
-## Chi tiết Cơ chế Tìm kiếm lai (Hybrid Search)
+## Hybrid Search Mechanism Details
 
-Logic cốt lõi để thực thi tìm kiếm lai kết hợp RRF được hiện thực hóa tại `retriever.py`. Trong quá trình truy vấn, hệ thống thực thi đồng thời hai luồng xử lý thông qua Qdrant client:
+The core logic for executing hybrid search with RRF is implemented in `retriever.py`. During a query, the system concurrently executes two processing streams through the Qdrant client:
 
-1. **Dense Query**: Truy xuất vector dày đặc từ model `bge-m3` nhằm tìm kiếm các phân đoạn văn bản có độ tương đồng cao nhất về mặt ngữ nghĩa (`Prefetch dense`).
-2. **Sparse Query**: Tính toán đối chiếu các trọng số từ khóa thưa thớt (`lexical_weights`) từ `bge-m3` để khớp chính xác các thuật ngữ viết tắt hoặc mã học phần đặc thù (`Prefetch sparse`).
-3. **Reciprocal Rank Fusion (RRF)**: Qdrant tổng hợp các danh sách xếp hạng từ cả hai luồng tìm kiếm bằng phương pháp RRF theo công thức:
+1. **Dense Query**: Retrieves dense vectors from the `bge-m3` model to find text segments with the highest semantic similarity (`Prefetch dense`).
+2. **Sparse Query**: Computes sparse keyword weights (`lexical_weights`) from `bge-m3` for exact matching of abbreviations or domain-specific course codes (`Prefetch sparse`).
+3. **Reciprocal Rank Fusion (RRF)**: Qdrant aggregates the ranking lists from both search streams using the RRF method with the formula:
    $$\text{Score}(d) = \sum_{m \in M} \frac{1}{k + r_m(d)}$$
-   *(Trong đó $r_m(d)$ là thứ hạng của tài liệu $d$ trong danh sách kết quả $m$, và hằng số $k = 60$)*.
+   *(Where $r_m(d)$ is the rank of document $d$ in result list $m$, and the constant $k = 60$)*.
 
-Sự kết hợp này đảm bảo hệ thống vừa nắm bắt được ngữ cảnh sâu của câu hỏi, vừa duy trì độ chính xác cao đối với các từ khóa cụ thể.
+This combination ensures the system captures deep contextual understanding of questions while maintaining high accuracy for specific keywords.
 
-## Hướng Phát triển Mở rộng (Production Readiness)
+## Future Development Roadmap (Production Readiness)
 
-- **RAG Evaluation**: Tích hợp các công cụ đo lường (ví dụ: Ragas, TruLens) để giám sát và đánh giá liên tục các chỉ số Faithfulness và Context Recall.
-- **Vector DB Clustering**: Triển khai kiến trúc cụm (cluster) cho Qdrant trên môi trường điện toán đám mây để hỗ trợ phân tán dữ liệu và cân bằng tải truy vấn.
-- **Embedding Pipeline Optimization**: Chuyển đổi mô hình tạo vector `BAAI/bge-m3` sang các server suy luận chuyên dụng (Triton Inference Server) hoặc áp dụng kỹ thuật tăng tốc phần cứng thông qua định dạng ONNX/TensorRT trên GPU.
+- **RAG Evaluation**: Integrate measurement tools (e.g., Ragas, TruLens) for continuous monitoring and evaluation of Faithfulness and Context Recall metrics.
+- **Vector DB Clustering**: Deploy a cluster architecture for Qdrant on cloud computing environments to support data distribution and query load balancing.
+- **Embedding Pipeline Optimization**: Migrate the `BAAI/bge-m3` embedding model to dedicated inference servers (Triton Inference Server) or apply hardware acceleration techniques using ONNX/TensorRT formats on GPU.

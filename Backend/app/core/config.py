@@ -17,10 +17,7 @@ class Settings(BaseSettings):
     EMBEDDING_VECTOR_SIZE: int = 1024
 
     CHUNK_SIZE: int = 800
-    CHUNK_OVERLAP: int = 100
     OVERLAP: int = 100
-    MAX_CHUNK_TOKENS: int = 800
-    OVERLAP_TOKENS: int = 100
 
     CUDA_VISIBLE_DEVICES: str = ""
     DEVICE: str = "cpu"
