@@ -31,7 +31,7 @@ class Retriever:
             # để không làm block event loop của FastAPI
             loop = asyncio.get_running_loop()
             result = await loop.run_in_executor(None, embedder.get_embeddings, [query])
-            dense_, sparse_, _ = result
+            dense_, sparse_ = result
         except Exception as e:
             logger.exception("Embedding failed: %s", e)
             return []

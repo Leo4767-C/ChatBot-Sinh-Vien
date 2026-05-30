@@ -228,7 +228,7 @@ def ingest_file(file_path: Path, doc_id: str | None = None, force: bool = False,
         texts = [c["embed_text"] for c in batch]
 
         try:
-            dense_vecs, sparse_vecs, _ = get_embeddings(texts)
+            dense_vecs, sparse_vecs = get_embeddings(texts)
         except Exception as e:
             log.exception("  Embed lỗi batch %s: %s", i // batch_size + 1, e)
             continue

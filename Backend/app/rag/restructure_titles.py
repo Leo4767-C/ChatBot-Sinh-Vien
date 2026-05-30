@@ -11,7 +11,7 @@ from unstructured.partition.text import partition_text
 
 log = logging.getLogger(__name__)
 
-
+# Tạo lớp chunk
 class Chunk:
     def __init__(
         self,
@@ -24,10 +24,11 @@ class Chunk:
         self.title = title
         self.content = content
         self.pages = pages or set()
-
+    # Sắp xếp các số trang vì dùng set() không tự sắp xếp đc 
     def get_pages_list(self) -> list[int]:
         return sorted(list(self.pages))
-
+    
+    # Ép kiểu số trang về int 
     def add_page_ref(self, page: int | None):
         if page is None:
             return
@@ -37,7 +38,8 @@ class Chunk:
                 self.pages.add(page)
         except Exception:
             return
-
+        
+    #Đóng gói chunk thành 1 dict
     def to_dict(self):
         return {
             "title_id": self.title_id,
@@ -46,7 +48,7 @@ class Chunk:
             "pages": sorted(list(self.pages)),
         }
 
-
+#Đảm bảo số trang ít nhất là 1
 def _safe_page_number(value: Any) -> int:
     try:
         page = int(value)
@@ -54,17 +56,17 @@ def _safe_page_number(value: Any) -> int:
     except Exception:
         return 1
 
-
+#Tạo id cho title
 def _make_title_id(title: str, page_number: int) -> str:
     return str(abs(hash(f"{title.strip()}::{page_number}")))
 
-
+# Xóa các khoảng trắng
 def _clean_text(text: str) -> str:
     text = (text or "").replace("\xa0", " ")
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
-
+#Phân loại đuôi file dựa vào unstructure 
 def _partition_file(file_path: Path):
     file_ext = file_path.suffix.lower()
 
@@ -77,7 +79,7 @@ def _partition_file(file_path: Path):
 
     return partition(filename=str(file_path))
 
-
+#Xử lý số la mã
 def _roman_to_int(token: str) -> int:
     roman_map = {"i": 1, "v": 5, "x": 10, "l": 50, "c": 100}
     token = token.lower()
@@ -92,7 +94,7 @@ def _roman_to_int(token: str) -> int:
             prev = val
     return total
 
-
+#Đặt heading level cho text
 def _extract_heading_level(text: str) -> int | None:
     """
     Heuristic level detector:
@@ -130,7 +132,7 @@ def _extract_heading_level(text: str) -> int | None:
 
     return None
 
-
+#Kiểm tra heading
 def _looks_like_heading(text: str, category: str = "") -> bool:
     t = _clean_text(text)
     if not t:
@@ -153,7 +155,7 @@ def _looks_like_heading(text: str, category: str = "") -> bool:
 
     return False
 
-
+#Chia cấp độ heading
 def _heading_level(text: str, category: str = "") -> int:
     level = _extract_heading_level(text)
     if level is not None:
@@ -175,7 +177,7 @@ def _heading_level(text: str, category: str = "") -> int:
 
     return 3
 
-
+#Xử lý file txt
 def _flat_txt_fallback(file_path: Path) -> dict:
     text = file_path.read_text(encoding="utf-8").strip()
     return {
@@ -187,7 +189,7 @@ def _flat_txt_fallback(file_path: Path) -> dict:
         "pages": [1],
     }
 
-
+#Tạo nút rỗng
 def _new_node(title: str, page_number: int) -> dict:
     return {
         "titleId": _make_title_id(title, page_number),
@@ -198,7 +200,7 @@ def _new_node(title: str, page_number: int) -> dict:
         "pages": [page_number] if page_number > 0 else [],
     }
 
-
+#append nội dung và số trang vào node(title)
 def _append_content(node: dict, text: str, page_number: int):
     text = _clean_text(text)
     if not text:
@@ -213,7 +215,7 @@ def _append_content(node: dict, text: str, page_number: int):
     if page_number > 0 and page_number not in node["pages"]:
         node["pages"].append(page_number)
 
-
+#Tạo nốt gốc
 def _ensure_root(file_path: Path) -> dict:
     return {
         "titleId": _make_title_id(file_path.stem, -1),
@@ -224,7 +226,7 @@ def _ensure_root(file_path: Path) -> dict:
         "pages": [],
     }
 
-
+#Tạo cây 
 def _build_tree_rule_based(elements: list[Any], file_path: Path) -> dict:
     root = _ensure_root(file_path)
     stack: list[tuple[int, dict]] = [(0, root)]
@@ -248,7 +250,7 @@ def _build_tree_rule_based(elements: list[Any], file_path: Path) -> dict:
 
             while stack and stack[-1][0] >= level:
                 stack.pop()
-
+            #[0]: level và 1 : hộp Node
             parent = stack[-1][1] if stack else root
             parent.setdefault("children", []).append(node)
             stack.append((level, node))
@@ -258,7 +260,7 @@ def _build_tree_rule_based(elements: list[Any], file_path: Path) -> dict:
 
     return root
 
-
+#Gom tất cả chunk và number_page dựa vào title_id
 def build_chunks_dict(content_items: list[dict[str, Any]]) -> dict[str, Chunk]:
     chunks: dict[str, Chunk] = {}
 
@@ -287,7 +289,7 @@ def build_chunks_dict(content_items: list[dict[str, Any]]) -> dict[str, Chunk]:
 
     return chunks
 
-
+#Đắp các content và page vào cây
 def merge_content(node: dict, chunks: dict[str, Chunk], depth: int = 0):
     if not isinstance(node, dict):
         return node
@@ -309,7 +311,7 @@ def merge_content(node: dict, chunks: dict[str, Chunk], depth: int = 0):
 
     return node
 
-
+#Xử lý các file đưa vào
 def chunk_by_title(file_path: str | Path) -> dict:
     file_path = Path(file_path)
     file_ext = file_path.suffix.lower()
@@ -357,7 +359,7 @@ def chunk_by_title(file_path: str | Path) -> dict:
     structured.setdefault("pages", [])
 
     return structured
-
+#Dành cho những tài liệu tự viết tay
 def chunk_manually_doc(file_path: str | Path) -> dict:
     path = Path(file_path)
     elements = _partition_file(path)
