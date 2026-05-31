@@ -8,6 +8,9 @@ import unicodedata
 
 def normalize_text(text: str) -> str:
     text = (text or "").lower().strip()
+    # FIX: Ký tự đ/Đ (d-stroke, U+0111/U+0110) không decompose qua NFD
+    # → phải thay thủ công trước khi NFD, nếu không sẽ bị xóa bởi regex [^a-z0-9\s]
+    text = text.replace("đ", "d").replace("Đ", "D")
     text = unicodedata.normalize("NFD", text)
     text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
     text = re.sub(r"[^a-z0-9\s]", " ", text)
